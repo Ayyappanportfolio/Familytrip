@@ -1,0 +1,734 @@
+<title>Vagamon–Cumbum Loop</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --bg:#EFF1E4;
+    --stage-a:#e7ecdd;
+    --stage-b:#f4efe0;
+    --shell:#FBFAF3;
+    --surface:#FFFFFF;
+    --surface-2:#F4F2E6;
+    --text:#1E2A22;
+    --text-dim:#5B6A5E;
+    --line:rgba(30,42,34,0.12);
+    --accent:#C97F2A;
+    --accent-ink:#5A3712;
+    --accent-soft:#F4DFB8;
+    --teal:#3F7A63;
+    --teal-soft:#DDEAE1;
+    --grape:#7A4368;
+    --grape-soft:#EEDDE7;
+    --shadow: 0 30px 60px -20px rgba(20,30,22,0.35), 0 2px 8px rgba(20,30,22,0.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1712;
+      --stage-a:#0b120e;
+      --stage-b:#141f16;
+      --shell:#152019;
+      --surface:#1B2A21;
+      --surface-2:#20301F;
+      --text:#ECE7D6;
+      --text-dim:#9FB0A2;
+      --line:rgba(236,231,214,0.12);
+      --accent:#E8A94B;
+      --accent-ink:#2A1B08;
+      --accent-soft:#3A2C14;
+      --teal:#7FC2A3;
+      --teal-soft:#1E3126;
+      --grape:#D191BE;
+      --grape-soft:#33212D;
+      --shadow: 0 30px 70px -20px rgba(0,0,0,0.6), 0 2px 10px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1712;
+    --stage-a:#0b120e;
+    --stage-b:#141f16;
+    --shell:#152019;
+    --surface:#1B2A21;
+    --surface-2:#20301F;
+    --text:#ECE7D6;
+    --text-dim:#9FB0A2;
+    --line:rgba(236,231,214,0.12);
+    --accent:#E8A94B;
+    --accent-ink:#2A1B08;
+    --accent-soft:#3A2C14;
+    --teal:#7FC2A3;
+    --teal-soft:#1E3126;
+    --grape:#D191BE;
+    --grape-soft:#33212D;
+    --shadow: 0 30px 70px -20px rgba(0,0,0,0.6), 0 2px 10px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background: radial-gradient(120% 100% at 15% 0%, var(--stage-a), var(--bg) 55%, var(--stage-b) 100%);
+    color:var(--text);
+    font-family:'Work Sans', system-ui, sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:28px 16px 40px;
+  }
+  h1,h2,h3{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; margin:0; }
+  .mono{ font-family:'IBM Plex Mono', 'SF Mono', monospace; letter-spacing:0.01em; }
+  .eyebrow{ text-transform:uppercase; letter-spacing:0.12em; font-size:11px; font-weight:600; color:var(--text-dim); }
+
+  .app{
+    width:min(430px, 100%);
+    background:var(--shell);
+    border-radius:30px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height:min(860px, calc(100vh - 56px));
+    border:1px solid var(--line);
+  }
+
+  .app-header{
+    padding:20px 22px 14px;
+    border-bottom:1px solid var(--line);
+    flex:0 0 auto;
+  }
+  .header-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .header-top h1{ font-size:22px; font-weight:600; line-height:1.15; }
+  .countdown{ font-size:11px; color:var(--accent-ink); background:var(--accent-soft); padding:4px 9px; border-radius:100px; font-weight:600; white-space:nowrap; }
+  .header-sub{ display:flex; align-items:center; gap:8px; margin-top:6px; color:var(--text-dim); font-size:13px; }
+  .header-sub .dot{ width:3px; height:3px; border-radius:50%; background:var(--text-dim); }
+
+  .app-body{ flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; padding:18px 22px 14px; scrollbar-width:thin; }
+  .app-body::-webkit-scrollbar{ width:6px; }
+  .app-body::-webkit-scrollbar-thumb{ background:var(--line); border-radius:4px; }
+
+  .panel{ display:none; flex-direction:column; gap:16px; }
+  .panel.active{ display:flex; }
+
+  .icon{ width:18px; height:18px; flex:0 0 auto; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .icon.filled{ fill:currentColor; stroke:none; }
+
+  /* ---------- Overview ---------- */
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .stat{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px 8px; text-align:center; }
+  .stat b{ display:block; font-family:'Fraunces',serif; font-size:20px; font-weight:600; }
+  .stat span{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; }
+
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+  .card h3{ font-size:15px; font-weight:600; margin-bottom:4px; }
+  .card p{ margin:0; font-size:13px; color:var(--text-dim); line-height:1.5; }
+
+  .depart-card{ display:flex; gap:12px; align-items:flex-start; background:linear-gradient(155deg, var(--accent-soft), var(--surface) 70%); border:1px solid var(--line); }
+  .depart-card .icon-wrap{ width:36px; height:36px; border-radius:10px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .depart-card .icon{ width:20px; height:20px; }
+
+  .highlights{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .hl{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:6px; }
+  .hl .icon-wrap{ width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+  .hl.teal .icon-wrap{ background:var(--teal-soft); color:var(--teal); }
+  .hl.grape .icon-wrap{ background:var(--grape-soft); color:var(--grape); }
+  .hl.amber .icon-wrap{ background:var(--accent-soft); color:var(--accent-ink); }
+  .hl b{ font-size:13px; font-weight:600; }
+  .hl span{ font-size:11.5px; color:var(--text-dim); }
+
+  .checklist{ display:flex; flex-direction:column; gap:8px; }
+  .checklist li{ list-style:none; display:flex; gap:8px; font-size:13px; color:var(--text); align-items:flex-start; }
+  .checklist li .icon{ color:var(--teal); margin-top:1px; width:15px; height:15px; }
+  .checklist{ margin:0; padding:0; }
+
+  /* ---------- Pickup & wallet preview (Overview) ---------- */
+  .pickup-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .pickup-head h3{ font-size:14.5px; }
+  .pickup-stops{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+  .pickup-stop{ display:flex; align-items:baseline; gap:10px; font-size:13px; }
+  .pickup-time{ color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:11.5px; flex:0 0 auto; }
+  .wallet-preview{ display:flex; flex-direction:column; gap:2px; cursor:pointer; background:linear-gradient(155deg, var(--teal-soft), var(--surface) 75%); }
+  .wallet-preview-top{ display:flex; align-items:center; justify-content:space-between; }
+  .wallet-preview b{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; }
+
+  /* ---------- Wallet tab ---------- */
+  .wallet-total{ text-align:center; background:linear-gradient(155deg, var(--teal-soft), var(--surface) 70%); }
+  .wallet-total b{ display:block; font-family:'Fraunces',serif; font-size:34px; font-weight:600; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+  .by-person{ display:flex; flex-wrap:wrap; gap:8px; }
+  .by-person .bp-chip{ display:flex; align-items:center; gap:7px; background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:5px 10px 5px 5px; font-size:12px; }
+  .by-person .avatar{ width:20px; height:20px; font-size:9px; }
+  .by-person .bp-amt{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-variant-numeric:tabular-nums; }
+
+  .expense-form{ display:flex; flex-direction:column; gap:9px; }
+  .form-row{ display:grid; grid-template-columns:1.3fr 1fr; gap:8px; }
+  .expense-form select, .expense-form input{
+    width:100%; font-family:'Work Sans', sans-serif; font-size:13px; color:var(--text);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:9px 10px;
+  }
+  .expense-form select:focus, .expense-form input:focus{ outline:2px solid var(--teal); outline-offset:1px; }
+  .btn-add{ display:flex; align-items:center; justify-content:center; gap:7px; background:var(--teal); color:var(--shell); border:none; border-radius:10px; padding:10px; font-size:13.5px; font-weight:600; font-family:inherit; cursor:pointer; }
+  .btn-add:disabled{ opacity:0.55; cursor:not-allowed; }
+  .expense-status{ font-size:12px; margin:0; }
+  .expense-status.err{ color:#B0473C; }
+  .expense-status.ok{ color:var(--teal); }
+
+  .expense-list{ display:flex; flex-direction:column; gap:10px; max-height:none; }
+  .exp-row{ display:flex; align-items:center; gap:10px; }
+  .exp-row .avatar{ width:26px; height:26px; font-size:10px; flex:0 0 auto; }
+  .exp-row .exp-mid{ flex:1 1 auto; min-width:0; }
+  .exp-row .exp-note{ font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .exp-row .exp-meta{ font-size:11px; color:var(--text-dim); }
+  .exp-row .exp-amt{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; flex:0 0 auto; }
+
+  /* ---------- Itinerary ---------- */
+  .day-rail{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin:0 -2px; scroll-snap-type:x mandatory; }
+  .day-chip{ scroll-snap-align:start; flex:0 0 auto; border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:8px 12px; text-align:center; cursor:pointer; min-width:64px; transition:background .15s, color .15s, border-color .15s; }
+  .day-chip .dnum{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; display:block; }
+  .day-chip .ddow{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; }
+  .day-chip.active{ background:var(--teal); border-color:var(--teal); color:#fff; }
+  .day-chip.active .ddow{ color:rgba(255,255,255,0.75); }
+
+  .day-tag{ font-size:12.5px; color:var(--text-dim); }
+  .day-tag b{ color:var(--text); font-weight:600; }
+  .day-note{ font-size:12px; color:var(--text-dim); background:var(--surface-2); border-radius:10px; padding:8px 10px; }
+
+  .timeline{ position:relative; padding-left:22px; display:flex; flex-direction:column; gap:16px; }
+  .timeline::before{ content:""; position:absolute; left:6px; top:6px; bottom:6px; width:1.5px; background:var(--line); }
+  .tl-item{ position:relative; }
+  .tl-item::before{ content:""; position:absolute; left:-22px; top:3px; width:9px; height:9px; border-radius:50%; background:var(--teal); border:2px solid var(--shell); box-shadow:0 0 0 1px var(--teal); }
+  .tl-item.tag-drive::before{ background:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .tl-item.tag-temple::before{ background:var(--grape); box-shadow:0 0 0 1px var(--grape); }
+  .tl-time{ font-size:11.5px; color:var(--text-dim); }
+  .tl-title-row{ display:flex; align-items:center; gap:7px; margin-top:2px; }
+  .tl-title-row .icon{ width:16px; height:16px; color:var(--teal); }
+  .tag-drive .tl-title-row .icon{ color:var(--accent); }
+  .tag-temple .tl-title-row .icon{ color:var(--grape); }
+  .tl-title{ font-size:14px; font-weight:600; }
+  .tl-note{ font-size:12.5px; color:var(--text-dim); margin-top:2px; line-height:1.45; }
+  .pill{ display:inline-block; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; padding:2px 7px; border-radius:100px; margin-top:6px; }
+  .pill.drive{ background:var(--accent-soft); color:var(--accent-ink); }
+  .pill.see{ background:var(--teal-soft); color:var(--teal); }
+  .pill.food{ background:var(--surface-2); color:var(--text-dim); }
+  .pill.rest{ background:var(--surface-2); color:var(--text-dim); }
+  .pill.temple{ background:var(--grape-soft); color:var(--grape); }
+
+  .tl-gallery{ display:flex; gap:8px; margin-top:8px; overflow-x:auto; padding-bottom:2px; }
+  .tl-photo{ flex:0 0 auto; margin:0; width:128px; }
+  .tl-photo img{ width:128px; height:92px; object-fit:cover; border-radius:10px; border:1px solid var(--line); display:block; background:var(--surface-2); }
+  .tl-photo figcaption{ font-size:9px; color:var(--text-dim); margin-top:3px; line-height:1.3; }
+
+  /* ---------- Map ---------- */
+  .map-wrap{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:10px; }
+  .map-wrap svg text{ font-family:'IBM Plex Mono', monospace; }
+  .leg-list{ display:flex; flex-direction:column; gap:10px; }
+  .leg{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+  .leg .icon-wrap{ width:28px; height:28px; border-radius:8px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; color:var(--accent); flex:0 0 auto; }
+  .leg .leg-route{ font-size:13px; font-weight:600; }
+  .leg .leg-meta{ font-size:11.5px; color:var(--text-dim); }
+  .leg .leg-stat{ margin-left:auto; text-align:right; font-size:12px; }
+  .leg .leg-stat b{ display:block; font-size:14px; }
+  .leg .leg-stat span{ color:var(--text-dim); font-size:10px; text-transform:uppercase; }
+
+  /* ---------- Crew ---------- */
+  .fam-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+  .fam-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .fam-head h3{ font-size:15px; font-weight:600; }
+  .fam-tag{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); }
+  .member-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .member{ display:flex; align-items:center; gap:7px; background:var(--surface-2); border-radius:100px; padding:5px 10px 5px 5px; }
+  .avatar{ width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; color:#fff; flex:0 0 auto; }
+  .member span{ font-size:12.5px; }
+  .fam-a .avatar{ background:var(--accent); color:var(--accent-ink); }
+  .fam-b .avatar{ background:var(--teal); }
+  .fam-c .avatar{ background:var(--grape); }
+  .you-badge{ font-size:9.5px; background:var(--grape-soft); color:var(--grape); padding:1px 6px; border-radius:100px; margin-left:6px; font-weight:600; text-transform:uppercase; }
+
+  .avatar.fam-a{ background:var(--accent); color:var(--accent-ink); }
+  .avatar.fam-b{ background:var(--teal); color:#fff; }
+  .avatar.fam-c{ background:var(--grape); color:#fff; }
+  .avatar.fam-shared{ background:var(--text-dim); color:var(--shell); }
+
+  .tabbar{ flex:0 0 auto; display:flex; border-top:1px solid var(--line); background:var(--shell); }
+  .tab-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 0 12px; background:none; border:none; color:var(--text-dim); font-family:inherit; cursor:pointer; }
+  .tab-btn .icon{ width:20px; height:20px; }
+  .tab-btn span{ font-size:10.5px; font-weight:500; }
+  .tab-btn.active{ color:var(--teal); }
+
+  @media (prefers-reduced-motion: no-preference){
+    .panel.active{ animation: rise .35s ease both; }
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:2px; border-radius:4px; }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M4 16l1.5-5.5A2 2 0 0 1 7.4 9h9.2a2 2 0 0 1 1.9 1.5L20 16"/><rect x="3" y="16" width="18" height="4" rx="1.4"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="16.5" cy="20" r="1.5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="13" r="4.2"/><path d="M12 4v2.2M4.6 13H2M22 13h-2.6M6.2 7.2 4.6 5.6M17.8 7.2l1.6-1.6"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c-1-6 2-13 14-14 1 12-6 15-14 14Z"/><path d="M6 18c3-4 6-7 12-12"/></symbol>
+    <symbol id="i-pine" viewBox="0 0 24 24"><path d="M12 3l4 6h-2.4l3.4 5.4h-3l3 5.6H6.6l3-5.6h-3L10 9H7.6z"/><path d="M11.3 20v2.4M12.7 20v2.4"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path d="M4 15q2-2 4 0t4 0 4 0 4 0"/><path d="M4 19q2-2 4 0t4 0 4 0 4 0"/><path d="M12 3c1.8 2.6 3 4.6 3 6.3A3 3 0 0 1 9 9.3C9 7.6 10.2 5.6 12 3Z"/></symbol>
+    <symbol id="i-peak" viewBox="0 0 24 24"><path d="M3 19 9.5 7l2.6 4.6L14.5 9 21 19Z"/><path d="M9.5 7l1.4 2.5M12.1 11.6 10 15"/></symbol>
+    <symbol id="i-grape" viewBox="0 0 24 24"><path d="M12 4v3"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="9" r="2"/><circle cx="12" cy="9" r="2"/><circle cx="7.5" cy="13" r="2"/><circle cx="12" cy="13" r="2"/><circle cx="16.5" cy="13" r="2"/><circle cx="9.5" cy="17" r="2"/><circle cx="14.5" cy="17" r="2"/></symbol>
+    <symbol id="i-temple" viewBox="0 0 24 24"><path d="M12 3l7 5H5Z"/><path d="M4 21V11h16v10M8 21v-6h8v6"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M8 3.5c.6.8.6 1.4 0 2.2M12 3.5c.6.8.6 1.4 0 2.2"/></symbol>
+    <symbol id="i-fork" viewBox="0 0 24 24"><path d="M8 3v6a2 2 0 0 0 4 0V3M10 9v12M16 3v8a3 3 0 1 0 0 0"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M4 8h11a2.5 2.5 0 1 0-2-4"/><path d="M3 13h14a2.5 2.5 0 1 1-2 4"/><path d="M4 18h9a2 2 0 1 0-1.6-3.2"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z"/><path d="M9 4v14M15 6v14"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M15.5 14a5 5 0 0 1 5.5 5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5 9 17l11-11"/></symbol>
+    <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="8.5" cy="12" r="2"/><path d="M13.5 10h5M13.5 13h5M6.5 16h4"/></symbol>
+    <symbol id="i-zip" viewBox="0 0 24 24"><path d="M4 5h6M4 5v6"/><path d="M4 5l16 16"/><circle cx="14" cy="14" r="2.2"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/><path d="M7 7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+
+  <header class="app-header">
+    <div class="header-top">
+      <h1>Vagamon &amp; Cumbum</h1>
+      <span class="countdown mono" id="countdown">—</span>
+    </div>
+    <div class="header-sub">
+      <span>Oct 16 – 20, 2026</span><span class="dot"></span>
+      <span>3 families · 11 travelers</span>
+    </div>
+  </header>
+
+  <main class="app-body">
+
+    <!-- OVERVIEW -->
+    <section class="panel active" data-panel="overview">
+      <div class="stat-row">
+        <div class="stat"><b>5</b><span>Days</span></div>
+        <div class="stat"><b>3</b><span>Homes</span></div>
+        <div class="stat"><b>11</b><span>Travelers</span></div>
+        <div class="stat"><b>~1170</b><span>Km loop</span></div>
+      </div>
+
+      <div class="card pickup-card">
+        <div class="pickup-head">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-car"/></svg></div>
+          <h3>Tempo Traveller pickup round</h3>
+        </div>
+        <div class="pickup-stops">
+          <div class="pickup-stop"><span class="mono pickup-time">5:00 AM</span><span>Sankar's home, Velachery</span></div>
+          <div class="pickup-stop"><span class="mono pickup-time">5:40 AM</span><span>Navin's home</span></div>
+          <div class="pickup-stop"><span class="mono pickup-time">6:10 AM</span><span>Ayyappan's home</span></div>
+        </div>
+        <p>One Tempo Traveller does the full round, then it's straight down NH38 toward the Ghats. First long halt is breakfast past Dindigul.</p>
+      </div>
+
+      <div class="card wallet-preview" data-goto="wallet">
+        <div class="wallet-preview-top">
+          <span class="eyebrow">Trip wallet</span>
+          <svg class="icon" style="width:15px;height:15px;color:var(--text-dim);"><use href="#i-list"/></svg>
+        </div>
+        <b class="mono" id="ovwTotal">₹0</b>
+        <span id="ovwSub" style="font-size:11.5px;color:var(--text-dim);">spent so far — tap to add or view</span>
+      </div>
+
+      <div>
+        <h3 style="font-size:14px; margin-bottom:8px;">Where the loop takes you</h3>
+        <div class="highlights">
+          <div class="hl teal"><div class="icon-wrap"><svg class="icon"><use href="#i-leaf"/></svg></div><b>Vagamon Meadows</b><span>Rolling grass hills, Kerala's "poor man's Ooty"</span></div>
+          <div class="hl amber"><div class="icon-wrap"><svg class="icon"><use href="#i-zip"/></svg></div><b>Vagamon Zipline</b><span>Zipline, rope cycling &amp; valley crossing</span></div>
+          <div class="hl teal"><div class="icon-wrap"><svg class="icon"><use href="#i-water"/></svg></div><b>Suruli Falls</b><span>Roadside cascade on the way up to Megamalai</span></div>
+          <div class="hl amber"><div class="icon-wrap"><svg class="icon"><use href="#i-peak"/></svg></div><b>Megamalai</b><span>Tea country &amp; reserve-forest viewpoints</span></div>
+          <div class="hl grape"><div class="icon-wrap"><svg class="icon"><use href="#i-grape"/></svg></div><b>Cumbum Grapes</b><span>Theni's vineyard belt — farm walk &amp; tasting</span></div>
+          <div class="hl grape"><div class="icon-wrap"><svg class="icon"><use href="#i-temple"/></svg></div><b>Saneeswaran Temple</b><span>Morning darshan in Theni's temple town</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:8px;">Before you leave</h3>
+        <ul class="checklist">
+          <li><svg class="icon"><use href="#i-check"/></svg> Light woollens for Vagamon evenings — it gets misty and cool after dark</li>
+          <li><svg class="icon"><use href="#i-id"/></svg> Carry ID for the Megamalai forest checkpost entry</li>
+          <li><svg class="icon"><use href="#i-check"/></svg> Fuel up in Theni — fewer pumps once you're on the ghat roads</li>
+          <li><svg class="icon"><use href="#i-check"/></svg> Kids' snacks &amp; water sorted before the 5 AM start</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ITINERARY -->
+    <section class="panel" data-panel="itinerary">
+      <div class="day-rail" id="dayRail"></div>
+      <div class="day-tag" id="dayTag"></div>
+      <div class="day-note" id="dayNote" hidden></div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- MAP -->
+    <section class="panel" data-panel="map">
+      <div class="map-wrap">
+        <svg viewBox="0 0 340 300" width="100%" role="img" aria-label="Route map from Chennai to Vagamon to Cumbum and back">
+          <path d="M280 250 C 180 230, 120 190, 90 120 C 75 85, 90 55, 130 45" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M130 45 C 160 65, 175 95, 185 130" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M185 130 C 220 175, 250 210, 280 250" fill="none" stroke="var(--grape)" stroke-width="2.5" stroke-dasharray="1 7" stroke-linecap="round"/>
+
+          <circle cx="280" cy="250" r="6" fill="var(--text)"/>
+          <text x="291" y="248" font-size="11" fill="var(--text)" font-weight="600">Chennai</text>
+          <text x="291" y="261" font-size="9" fill="var(--text-dim)">Velachery · start / end</text>
+
+          <circle cx="130" cy="45" r="6" fill="var(--teal)"/>
+          <text x="141" y="43" font-size="11" fill="var(--text)" font-weight="600">Vagamon</text>
+          <text x="141" y="56" font-size="9" fill="var(--text-dim)">Oct 16 eve – 18 midday</text>
+
+          <circle cx="185" cy="130" r="6" fill="var(--grape)"/>
+          <text x="196" y="128" font-size="11" fill="var(--text)" font-weight="600">Cumbum</text>
+          <text x="196" y="141" font-size="9" fill="var(--text-dim)">Oct 18 eve – 20 midday</text>
+
+          <circle cx="230" cy="185" r="4" fill="var(--accent)"/>
+          <text x="238" y="188" font-size="8.5" fill="var(--text-dim)">Suruli / Megamalai</text>
+        </svg>
+      </div>
+
+      <div class="leg-list">
+        <div class="leg">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-car"/></svg></div>
+          <div><div class="leg-route">Velachery → Vagamon</div><div class="leg-meta">via Dindigul – Theni – Vandiperiyar</div></div>
+          <div class="leg-stat"><b>~600 km</b><span>~13 hr</span></div>
+        </div>
+        <div class="leg">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-car"/></svg></div>
+          <div><div class="leg-route">Vagamon → Cumbum</div><div class="leg-meta">via Vandiperiyar – Kumily ghat road</div></div>
+          <div class="leg-stat"><b>~75 km</b><span>~2.5 hr</span></div>
+        </div>
+        <div class="leg">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-peak"/></svg></div>
+          <div><div class="leg-route">Cumbum ↔ Megamalai</div><div class="leg-meta">day trip, Suruli Falls en route</div></div>
+          <div class="leg-stat"><b>~35 km</b><span>~1.5 hr</span></div>
+        </div>
+        <div class="leg">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-car"/></svg></div>
+          <div><div class="leg-route">Cumbum → Velachery</div><div class="leg-meta">via Theni – Dindigul – NH38</div></div>
+          <div class="leg-stat"><b>~500 km</b><span>~9 hr</span></div>
+        </div>
+      </div>
+      <p style="font-size:11px; color:var(--text-dim); text-align:center; margin:0;">Distances &amp; drive times are approximate — build in stops for meals and kids.</p>
+    </section>
+
+    <!-- CREW -->
+    <section class="panel" data-panel="crew">
+      <div class="fam-card fam-a">
+        <div class="fam-head"><h3>Sankar's Family</h3><span class="fam-tag">Hosts · Velachery</span></div>
+        <div class="member-row">
+          <div class="member"><div class="avatar">S</div><span>Sankar</span></div>
+          <div class="member"><div class="avatar">S</div><span>Saradha</span></div>
+          <div class="member"><div class="avatar">S</div><span>Shravan</span></div>
+          <div class="member"><div class="avatar">S</div><span>Sudhan</span></div>
+        </div>
+      </div>
+      <div class="fam-card fam-b">
+        <div class="fam-head"><h3>Navin's Family</h3><span class="fam-tag">3 travelers</span></div>
+        <div class="member-row">
+          <div class="member"><div class="avatar">N</div><span>Navin</span></div>
+          <div class="member"><div class="avatar">B</div><span>Brindha</span></div>
+          <div class="member"><div class="avatar">A</div><span>Aarush</span></div>
+        </div>
+      </div>
+      <div class="fam-card fam-c">
+        <div class="fam-head"><h3>Ayyappan's Family <span class="you-badge">You</span></h3><span class="fam-tag">4 travelers</span></div>
+        <div class="member-row">
+          <div class="member"><div class="avatar">A</div><span>Ayyappan</span></div>
+          <div class="member"><div class="avatar">R</div><span>Raji</span></div>
+          <div class="member"><div class="avatar">T</div><span>Thugi</span></div>
+          <div class="member"><div class="avatar">N</div><span>Nilan</span></div>
+        </div>
+      </div>
+      <p style="font-size:11.5px; color:var(--text-dim); text-align:center; margin:2px 0 0;">11 travelers, three homes, one loop through the Ghats.</p>
+    </section>
+
+    <!-- WALLET -->
+    <section class="panel" data-panel="wallet">
+      <div class="card wallet-total">
+        <span class="eyebrow">Cumulative spend</span>
+        <b class="mono" id="walletTotal">₹0</b>
+        <span id="walletSub" style="font-size:12px; color:var(--text-dim);">Loading live total…</span>
+      </div>
+
+      <div id="walletByPerson" class="by-person"></div>
+
+      <form class="card expense-form" id="expenseForm">
+        <h3 style="margin-bottom:10px;">Log an expense</h3>
+        <div class="form-row">
+          <select id="expSpender" required>
+            <option value="" disabled selected>Who spent?</option>
+            <optgroup label="Sankar's family">
+              <option>Sankar</option><option>Saradha</option><option>Shravan</option><option>Sudhan</option>
+            </optgroup>
+            <optgroup label="Navin's family">
+              <option>Navin</option><option>Brindha</option><option>Aarush</option>
+            </optgroup>
+            <optgroup label="Ayyappan's family">
+              <option>Ayyappan</option><option>Raji</option><option>Thugi</option><option>Nilan</option>
+            </optgroup>
+            <option value="Shared">Shared / common fund</option>
+          </select>
+          <input type="number" id="expAmount" placeholder="Amount (₹)" min="0" step="1" inputmode="decimal" required />
+        </div>
+        <input type="text" id="expNote" placeholder="What for? e.g. Fuel, Vagamon lunch" maxlength="80" required />
+        <button type="submit" class="btn-add"><svg class="icon" style="width:15px;height:15px;"><use href="#i-plus"/></svg> Add expense</button>
+        <p id="expenseStatus" class="expense-status" hidden></p>
+      </form>
+
+      <div class="card">
+        <h3 style="margin-bottom:8px;">Recent entries</h3>
+        <div id="expenseList" class="expense-list"><p style="font-size:12.5px;color:var(--text-dim);margin:0;">Connecting…</p></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="overview"><svg class="icon"><use href="#i-home"/></svg><span>Overview</span></button>
+    <button class="tab-btn" data-tab="itinerary"><svg class="icon"><use href="#i-list"/></svg><span>Itinerary</span></button>
+    <button class="tab-btn" data-tab="map"><svg class="icon"><use href="#i-map"/></svg><span>Map</span></button>
+    <button class="tab-btn" data-tab="crew"><svg class="icon"><use href="#i-users"/></svg><span>Crew</span></button>
+    <button class="tab-btn" data-tab="wallet"><svg class="icon"><use href="#i-wallet"/></svg><span>Wallet</span></button>
+  </nav>
+</div>
+
+<script src="photos.js"></script>
+<script>
+(function(){
+  var days = [
+    { date:'Oct 16', dow:'Fri', tag:'Velachery → Vagamon', note:'One Tempo Traveller does all three pickups before the highway stretch begins.', stops:[
+      {t:'5:00 AM', title:'Pickup — Sankar\'s home', note:'Tempo Traveller starts the round at Velachery.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'5:40 AM', title:'Pickup — Navin\'s home', note:'Second stop on the pickup round.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'6:10 AM', title:'Pickup — Ayyappan\'s home', note:'Last pickup, then straight down NH38 toward the Ghats.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'8:30 AM', title:'Breakfast halt', note:'Highway stop past the Dindigul stretch.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'1:00 PM', title:'Lunch halt, Theni belt', note:'Last flat-road meal before the ghat climb starts.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'4:00 PM', title:'Ghat climb begins', note:'Vandiperiyar → Vagamon hill road — slow down for the curves.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'6:00 PM', title:'Arrive Vagamon', note:'Check in, then evening tea with the meadow view.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
+    ]},
+    { date:'Oct 17', dow:'Sat', tag:'Vagamon', note:'Suggested spots for today — swap freely to suit the group\'s pace.', stops:[
+      {t:'7:30 AM', title:'Vagamon Meadows', note:'Sunrise over the rolling grass hills — best light of the day.', icon:'i-leaf', cls:'tag-see', pill:'see', photo:'vagamon_meadows'},
+      {t:'9:30 AM', title:'Pine Forest', note:'Short, easy walk — good for the kids to run around.', icon:'i-pine', cls:'tag-see', pill:'see', photo:'pine_forest'},
+      {t:'11:00 AM', title:'Vagamon Adventure Zone', note:'The zipline everyone talks about, plus rope cycling and valley crossing — a proper adrenaline break for the teens (and anyone else game).', icon:'i-zip', cls:'tag-see', pill:'see', photo:'vagamon_adventure'},
+      {t:'1:00 PM', title:'Lunch', note:'Back near the meadows, Kerala thali stop.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'2:30 PM', title:'Vagamon Lake', note:'Pedal boating before the afternoon cools off.', icon:'i-water', cls:'tag-see', pill:'see', photo:'vagamon_lake'},
+      {t:'4:00 PM', title:'Kurisumala viewpoint', note:'Hilltop cross with a wide view over the valley.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'kurisumala'},
+      {t:'6:30 PM', title:'Bonfire &amp; tea', note:'Evening in at the stay — Vagamon nights are properly cold.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
+    ]},
+    { date:'Oct 18', dow:'Sun', tag:'Vagamon → Cumbum', note:'Half-day in Vagamon, then the drive down to Cumbum for the night.', stops:[
+      {t:'8:00 AM', title:'Suicide Point &amp; Marmala viewpoint', note:'Cliffside lookout — hold the kids\' hands close here.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'suicide_point'},
+      {t:'10:30 AM', title:'Barren Hills', note:'Open grassland; paragliding window if the weather cooperates.', icon:'i-wind', cls:'tag-see', pill:'see', photo:'barren_hills'},
+      {t:'1:00 PM', title:'Early lunch &amp; check-out', note:'Pack up before the descent.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'2:00 PM', title:'Depart for Cumbum', note:'Back through the Vandiperiyar–Kumily ghat road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'7:00 PM', title:'Arrive Cumbum', note:'Check in, dinner, early night — full day tomorrow.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
+    ]},
+    { date:'Oct 19', dow:'Mon', tag:'Cumbum · Megamalai', note:null, stops:[
+      {t:'7:00 AM', title:'Depart for Suruli Falls', note:'First stop on the Megamalai road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'8:00 AM', title:'Suruli Falls', note:'Waterfall stop — carry a change of clothes if the kids want the plunge pool.', icon:'i-water', cls:'tag-see', pill:'see', photo:'suruli_falls'},
+      {t:'10:30 AM', title:'On to Megamalai', note:'Winding tea-estate roads — keep IDs handy for the forest checkpost.', icon:'i-id', cls:'tag-drive', pill:'drive'},
+      {t:'11:30 AM', title:'Megamalai viewpoints', note:'Tea gardens and misty ridgeline views — the "high wavy mountains".', icon:'i-peak', cls:'tag-see', pill:'see', photo:'megamalai'},
+      {t:'2:00 PM', title:'Packed lunch at Megamalai', note:'Best eaten with that view.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'5:00 PM', title:'Return to Cumbum', note:'Same road back down — no rush.', icon:'i-car', cls:'tag-drive', pill:'drive'}
+    ]},
+    { date:'Oct 20', dow:'Tue', tag:'Cumbum → Chennai', note:null, stops:[
+      {t:'7:30 AM', title:'Grapes Garden', note:'Farm walk through Cumbum\'s vineyard belt, with tasting.', icon:'i-grape', cls:'tag-see', pill:'see', photo:'grapes_garden'},
+      {t:'9:30 AM', title:'Saneeswaran Temple', note:'Morning darshan before the long drive back.', icon:'i-temple', cls:'tag-temple', pill:'temple', photo:'saneeswaran_temple'},
+      {t:'11:30 AM', title:'Pack up', note:'Check out, load the cars.', icon:'i-cup', cls:'tag-rest', pill:'rest'},
+      {t:'1:00 PM', title:'Lunch', note:'Last meal on the road before the highway stretch.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'2:00 PM', title:'Depart for Chennai', note:'Via Theni – Dindigul – NH38.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'~10:00 PM', title:'Expected arrival, Velachery', note:'Approximate — depends on dinner stops.', icon:'i-car', cls:'tag-drive', pill:'drive'}
+    ]}
+  ];
+
+  var PHOTOS = window.__TRIP_PHOTOS__ || {};
+
+  var railEl = document.getElementById('dayRail');
+  var tagEl = document.getElementById('dayTag');
+  var noteEl = document.getElementById('dayNote');
+  var tlEl = document.getElementById('timeline');
+  var activeDay = 0;
+
+  days.forEach(function(d, i){
+    var chip = document.createElement('div');
+    chip.className = 'day-chip' + (i === activeDay ? ' active' : '');
+    chip.innerHTML = '<span class="dnum">' + d.date.split(' ')[1] + '</span><span class="ddow">' + d.dow + '</span>';
+    chip.addEventListener('click', function(){ selectDay(i); });
+    railEl.appendChild(chip);
+  });
+
+  function selectDay(i){
+    activeDay = i;
+    Array.prototype.forEach.call(railEl.children, function(c, idx){
+      c.classList.toggle('active', idx === i);
+    });
+    var d = days[i];
+    tagEl.innerHTML = '<b>' + d.date + ', ' + d.dow + '</b> · ' + d.tag;
+    if (d.note) { noteEl.hidden = false; noteEl.textContent = d.note; }
+    else { noteEl.hidden = true; }
+    tlEl.innerHTML = '';
+    d.stops.forEach(function(s){
+      var item = document.createElement('div');
+      item.className = 'tl-item ' + s.cls;
+      var photos = s.photo ? (PHOTOS[s.photo] || []) : [];
+      var galleryHtml = '';
+      if (photos.length) {
+        galleryHtml = '<div class="tl-gallery">' + photos.map(function(p){
+          return '<figure class="tl-photo"><img src="' + p.src + '" alt="' + s.title.replace(/&amp;/g,'&') + '" loading="lazy" />' +
+                 (p.credit ? '<figcaption>' + p.credit + '</figcaption>' : '') + '</figure>';
+        }).join('') + '</div>';
+      }
+      item.innerHTML =
+        '<div class="tl-time mono">' + s.t + '</div>' +
+        '<div class="tl-title-row"><svg class="icon"><use href="#' + s.icon + '"/></svg><span class="tl-title">' + s.title + '</span></div>' +
+        '<div class="tl-note">' + s.note + '</div>' +
+        galleryHtml +
+        '<span class="pill ' + s.pill + '">' + s.pill + '</span>';
+      tlEl.appendChild(item);
+    });
+    try { localStorage.setItem('vc-loop-day', String(i)); } catch(e) {}
+  }
+
+  var savedDay = 0;
+  try {
+    var sd = parseInt(localStorage.getItem('vc-loop-day'), 10);
+    if (!isNaN(sd) && sd >= 0 && sd < days.length) savedDay = sd;
+  } catch(e) {}
+  selectDay(savedDay);
+
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var panels = document.querySelectorAll('.panel');
+  function selectTab(name){
+    tabBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.tab === name); });
+    panels.forEach(function(p){ p.classList.toggle('active', p.dataset.panel === name); });
+    try { localStorage.setItem('vc-loop-tab', name); } catch(e) {}
+  }
+  tabBtns.forEach(function(b){
+    b.addEventListener('click', function(){ selectTab(b.dataset.tab); });
+  });
+  try {
+    var savedTab = localStorage.getItem('vc-loop-tab');
+    if (savedTab) selectTab(savedTab);
+  } catch(e) {}
+
+  // ---- Wallet (shared, live-synced expense ledger) ----
+  var TRAVELERS = {
+    'Sankar':'fam-a','Saradha':'fam-a','Shravan':'fam-a','Sudhan':'fam-a',
+    'Navin':'fam-b','Brindha':'fam-b','Aarush':'fam-b',
+    'Ayyappan':'fam-c','Raji':'fam-c','Thugi':'fam-c','Nilan':'fam-c',
+    'Shared':'fam-shared'
+  };
+  function fmtINR(n){ return '₹' + Math.round(n || 0).toLocaleString('en-IN'); }
+  function initials(name){ return (name || '?').charAt(0).toUpperCase(); }
+
+  document.querySelectorAll('[data-goto]').forEach(function(el){
+    el.addEventListener('click', function(){ selectTab(el.dataset.goto); });
+  });
+
+  var walletDb = null;
+  var expenseForm = document.getElementById('expenseForm');
+  var expenseStatus = document.getElementById('expenseStatus');
+  var addBtn = expenseForm.querySelector('.btn-add');
+
+  function renderExpenses(docs){
+    var total = 0, byPerson = {};
+    docs.forEach(function(d){
+      var data = d.data() || {};
+      var amt = Number(data.amount) || 0;
+      total += amt;
+      var who = data.spender || 'Shared';
+      byPerson[who] = (byPerson[who] || 0) + amt;
+    });
+
+    document.getElementById('walletTotal').textContent = fmtINR(total);
+    document.getElementById('walletSub').textContent = docs.length +
+      (docs.length === 1 ? ' entry logged' : ' entries logged') + ' · updates live for everyone';
+    document.getElementById('ovwTotal').textContent = fmtINR(total);
+    document.getElementById('ovwSub').textContent = docs.length ?
+      ('spent so far, ' + docs.length + ' entries — tap to add or view') : 'nothing logged yet — tap to add';
+
+    var names = Object.keys(byPerson).sort(function(a, b){ return byPerson[b] - byPerson[a]; });
+    document.getElementById('walletByPerson').innerHTML = names.length ? names.map(function(name){
+      var famCls = TRAVELERS[name] || 'fam-shared';
+      return '<div class="bp-chip"><div class="avatar ' + famCls + '">' + initials(name) + '</div><span>' + name +
+        '</span><span class="bp-amt mono">' + fmtINR(byPerson[name]) + '</span></div>';
+    }).join('') : '<p style="font-size:12px;color:var(--text-dim);margin:0;">No expenses logged yet.</p>';
+
+    var listEl = document.getElementById('expenseList');
+    if (!docs.length) {
+      listEl.innerHTML = '<p style="font-size:12.5px;color:var(--text-dim);margin:0;">Nothing logged yet — be the first.</p>';
+      return;
+    }
+    listEl.innerHTML = docs.slice(0, 40).map(function(d){
+      var data = d.data() || {};
+      var famCls = TRAVELERS[data.spender] || 'fam-shared';
+      var when = '';
+      try { when = new Date(data.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' }); } catch(e) {}
+      return '<div class="exp-row"><div class="avatar ' + famCls + '">' + initials(data.spender) + '</div>' +
+        '<div class="exp-mid"><div class="exp-note">' + (data.note || '') + '</div>' +
+        '<div class="exp-meta">' + (data.spender || 'Shared') + (when ? ' · ' + when : '') + '</div></div>' +
+        '<div class="exp-amt mono">' + fmtINR(data.amount) + '</div></div>';
+    }).join('');
+  }
+
+  function showWalletUnavailable(msg){
+    document.getElementById('walletSub').textContent = msg || 'Live sync isn\'t available in this view.';
+    document.getElementById('expenseList').innerHTML =
+      '<p style="font-size:12.5px;color:var(--text-dim);margin:0;">Sign in with your trip\'s Claude account to add or see shared expenses here.</p>';
+    if (addBtn) addBtn.disabled = true;
+  }
+
+  (function initDb(){
+    if (!window.claude || typeof window.claude.use !== 'function') { showWalletUnavailable(); return; }
+    window.claude.use('db').then(function(db){
+      if (!db) { showWalletUnavailable(); return; }
+      walletDb = db;
+      db.collection('expenses').orderBy('createdAt', 'desc').limit(200).onSnapshot(function(snap){
+        renderExpenses(snap.docs);
+      }, function(err){
+        showWalletUnavailable('Couldn\'t load shared expenses (' + err.code + ').');
+      });
+    }).catch(function(){ showWalletUnavailable(); });
+  })();
+
+  expenseForm.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if (!walletDb) { showWalletUnavailable(); return; }
+    var spender = document.getElementById('expSpender').value;
+    var amount = parseFloat(document.getElementById('expAmount').value);
+    var note = document.getElementById('expNote').value.trim();
+    if (!spender || !amount || amount <= 0 || !note) {
+      expenseStatus.hidden = false;
+      expenseStatus.className = 'expense-status err';
+      expenseStatus.textContent = 'Fill in who, the amount, and what it was for.';
+      return;
+    }
+    addBtn.disabled = true;
+    walletDb.collection('expenses').add({
+      spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
+    }).then(function(){
+      expenseForm.reset();
+      expenseStatus.hidden = false;
+      expenseStatus.className = 'expense-status ok';
+      expenseStatus.textContent = 'Added.';
+      addBtn.disabled = false;
+      setTimeout(function(){ expenseStatus.hidden = true; }, 2500);
+    }).catch(function(err){
+      expenseStatus.hidden = false;
+      expenseStatus.className = 'expense-status err';
+      expenseStatus.textContent = 'Could not save (' + ((err && err.code) || 'error') + ') — try again.';
+      addBtn.disabled = false;
+    });
+  });
+
+  function updateCountdown(){
+    var departure = new Date('2026-10-16T05:00:00+05:30');
+    var now = new Date();
+    var diff = departure.getTime() - now.getTime();
+    var el = document.getElementById('countdown');
+    if (diff <= 0) { el.textContent = 'On the road'; return; }
+    var days_ = Math.ceil(diff / 86400000);
+    el.textContent = days_ + (days_ === 1 ? ' day to go' : ' days to go');
+  }
+  updateCountdown();
+})();
+</script>
