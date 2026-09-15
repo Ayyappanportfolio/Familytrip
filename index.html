@@ -145,6 +145,11 @@
   .pickup-stops{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
   .pickup-stop{ display:flex; align-items:baseline; gap:10px; font-size:13px; }
   .pickup-time{ color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:11.5px; flex:0 0 auto; }
+  .glimpse-card{ display:flex; flex-direction:column; gap:10px; }
+  .glimpse-top{ display:flex; gap:12px; align-items:flex-start; }
+  .glimpse-top h3{ font-size:14.5px; margin-bottom:2px; }
+  .glimpse-btn{ align-self:flex-start; font-size:12.5px; font-weight:600; color:var(--grape); background:var(--grape-soft); border-radius:100px; padding:6px 14px; text-decoration:none; }
+
   .wallet-preview{ display:flex; flex-direction:column; gap:2px; cursor:pointer; background:linear-gradient(155deg, var(--teal-soft), var(--surface) 75%); }
   .wallet-preview-top{ display:flex; align-items:center; justify-content:space-between; }
   .wallet-preview b{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; }
@@ -177,6 +182,9 @@
   .exp-row .exp-note{ font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .exp-row .exp-meta{ font-size:11px; color:var(--text-dim); }
   .exp-row .exp-amt{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; flex:0 0 auto; }
+  .exp-del{ flex:0 0 auto; width:26px; height:26px; border-radius:8px; border:none; background:none; color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
+  .exp-del .icon{ width:13px; height:13px; }
+  .exp-del.armed{ background:#B0473C; color:#fff; }
 
   /* ---------- Itinerary ---------- */
   .day-rail{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin:0 -2px; scroll-snap-type:x mandatory; }
@@ -282,6 +290,8 @@
     <symbol id="i-zip" viewBox="0 0 24 24"><path d="M4 5h6M4 5v6"/><path d="M4 5l16 16"/><circle cx="14" cy="14" r="2.2"/></symbol>
     <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/><path d="M7 7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-photos" viewBox="0 0 24 24"><rect x="3" y="6" width="15" height="13" rx="2"/><path d="M8 15l2.5-3 2 2 2.5-3.5L18 15"/><circle cx="8.5" cy="10" r="1.2"/><path d="M7 6V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v9"/></symbol>
   </defs>
 </svg>
 
@@ -343,6 +353,17 @@
         </div>
       </div>
 
+      <div class="card glimpse-card" id="glimpseCard">
+        <div class="glimpse-top">
+          <div class="icon-wrap" style="background:var(--grape-soft); color:var(--grape);"><svg class="icon"><use href="#i-photos"/></svg></div>
+          <div>
+            <h3>Earlier trip, a glimpse</h3>
+            <p id="glimpseSub" style="margin:0;">Photos from a previous family trip — link coming soon.</p>
+          </div>
+        </div>
+        <a id="glimpseLink" class="glimpse-btn" href="#" target="_blank" rel="noopener" hidden>Open the album ↗</a>
+      </div>
+
       <div class="card">
         <h3 style="margin-bottom:8px;">Before you leave</h3>
         <ul class="checklist">
@@ -402,6 +423,11 @@
           <div class="icon-wrap"><svg class="icon"><use href="#i-peak"/></svg></div>
           <div><div class="leg-route">Cumbum ↔ Megamalai</div><div class="leg-meta">day trip, Suruli Falls en route</div></div>
           <div class="leg-stat"><b>~35 km</b><span>~1.5 hr</span></div>
+        </div>
+        <div class="leg">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-peak"/></svg></div>
+          <div><div class="leg-route">Cumbum ↔ Ramakkalmedu</div><div class="leg-meta">windmill ridge, Kuchanur on the way back</div></div>
+          <div class="leg-stat"><b>~20 km</b><span>~45 min</span></div>
         </div>
         <div class="leg">
           <div class="icon-wrap"><svg class="icon"><use href="#i-car"/></svg></div>
@@ -515,12 +541,14 @@
       {t:'4:00 PM', title:'Kurisumala viewpoint', note:'Hilltop cross with a wide view over the valley.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'kurisumala'},
       {t:'6:30 PM', title:'Bonfire &amp; tea', note:'Evening in at the stay — Vagamon nights are properly cold.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
     ]},
-    { date:'Oct 18', dow:'Sun', tag:'Vagamon → Cumbum', note:'Half-day in Vagamon, then the drive down to Cumbum for the night.', stops:[
+    { date:'Oct 18', dow:'Sun', tag:'Vagamon → Cumbum', note:'A full day in Vagamon this time — staying until 5 PM before the drive down.', stops:[
       {t:'8:00 AM', title:'Suicide Point &amp; Marmala viewpoint', note:'Cliffside lookout — hold the kids\' hands close here.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'suicide_point'},
-      {t:'10:30 AM', title:'Barren Hills', note:'Open grassland; paragliding window if the weather cooperates.', icon:'i-wind', cls:'tag-see', pill:'see', photo:'barren_hills'},
-      {t:'1:00 PM', title:'Early lunch &amp; check-out', note:'Pack up before the descent.', icon:'i-fork', cls:'tag-food', pill:'food'},
-      {t:'2:00 PM', title:'Depart for Cumbum', note:'Back through the Vandiperiyar–Kumily ghat road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
-      {t:'7:00 PM', title:'Arrive Cumbum', note:'Check in, dinner, early night — full day tomorrow.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
+      {t:'10:00 AM', title:'Barren Hills', note:'Open grassland; paragliding window if the weather cooperates.', icon:'i-wind', cls:'tag-see', pill:'see', photo:'barren_hills'},
+      {t:'12:00 PM', title:'Lunch &amp; check-out', note:'Pack up the rooms before heading back out for the afternoon.', icon:'i-fork', cls:'tag-food', pill:'food'},
+      {t:'1:30 PM', title:'Vagamon Glass Bridge', note:'The glass-floor skywalk everyone\'s been posting about — great for photos.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'vagamon_glass_bridge'},
+      {t:'3:00 PM', title:'Ilaveezha Poonchira', note:'A quieter valley viewpoint a little out of town — worth the detour.', icon:'i-leaf', cls:'tag-see', pill:'see', photo:'ilaveezha_poonchira'},
+      {t:'5:00 PM', title:'Depart for Cumbum', note:'Back through the Vandiperiyar–Kumily ghat road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
+      {t:'7:30 PM', title:'Arrive Cumbum', note:'Check in, dinner, early night — full day tomorrow.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
     ]},
     { date:'Oct 19', dow:'Mon', tag:'Cumbum · Megamalai', note:null, stops:[
       {t:'7:00 AM', title:'Depart for Suruli Falls', note:'First stop on the Megamalai road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
@@ -530,17 +558,26 @@
       {t:'2:00 PM', title:'Packed lunch at Megamalai', note:'Best eaten with that view.', icon:'i-fork', cls:'tag-food', pill:'food'},
       {t:'5:00 PM', title:'Return to Cumbum', note:'Same road back down — no rush.', icon:'i-car', cls:'tag-drive', pill:'drive'}
     ]},
-    { date:'Oct 20', dow:'Tue', tag:'Cumbum → Chennai', note:null, stops:[
-      {t:'7:30 AM', title:'Grapes Garden', note:'Farm walk through Cumbum\'s vineyard belt, with tasting.', icon:'i-grape', cls:'tag-see', pill:'see', photo:'grapes_garden'},
-      {t:'9:30 AM', title:'Saneeswaran Temple', note:'Morning darshan before the long drive back.', icon:'i-temple', cls:'tag-temple', pill:'temple', photo:'saneeswaran_temple'},
-      {t:'11:30 AM', title:'Pack up', note:'Check out, load the cars.', icon:'i-cup', cls:'tag-rest', pill:'rest'},
-      {t:'1:00 PM', title:'Lunch', note:'Last meal on the road before the highway stretch.', icon:'i-fork', cls:'tag-food', pill:'food'},
+    { date:'Oct 20', dow:'Tue', tag:'Cumbum → Chennai', note:'Morning at Ramakkalmedu, then Kuchanur before the drive home.', stops:[
+      {t:'7:00 AM', title:'Grapes Garden', note:'Quick farm walk through Cumbum\'s vineyard belt, with tasting, on the way out.', icon:'i-grape', cls:'tag-see', pill:'see', photo:'grapes_garden'},
+      {t:'8:00 AM', title:'Ramakkalmedu', note:'Windmill-covered ridge on the Kerala border, looking straight down over the Cumbum valley — worth the climb.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'ramakkalmedu'},
+      {t:'11:00 AM', title:'Kuchanur Saneeswarar Temple', note:'Back toward Cumbum for darshan at the Shani temple.', icon:'i-temple', cls:'tag-temple', pill:'temple', photo:'saneeswaran_temple'},
+      {t:'1:00 PM', title:'Lunch &amp; pack up', note:'Check out, load the cars.', icon:'i-fork', cls:'tag-food', pill:'food'},
       {t:'2:00 PM', title:'Depart for Chennai', note:'Via Theni – Dindigul – NH38.', icon:'i-car', cls:'tag-drive', pill:'drive'},
       {t:'~10:00 PM', title:'Expected arrival, Velachery', note:'Approximate — depends on dinner stops.', icon:'i-car', cls:'tag-drive', pill:'drive'}
     ]}
   ];
 
   var PHOTOS = window.__TRIP_PHOTOS__ || {};
+
+  // Paste the shared Drive/Photos link between the quotes below to activate the "Earlier trip" card.
+  var EARLIER_TRIP_ALBUM_URL = '';
+  if (EARLIER_TRIP_ALBUM_URL) {
+    document.getElementById('glimpseSub').textContent = 'A few photos from a previous family trip.';
+    var glimpseLink = document.getElementById('glimpseLink');
+    glimpseLink.href = EARLIER_TRIP_ALBUM_URL;
+    glimpseLink.hidden = false;
+  }
 
   var railEl = document.getElementById('dayRail');
   var tagEl = document.getElementById('dayTag');
@@ -666,7 +703,8 @@
       return '<div class="exp-row"><div class="avatar ' + famCls + '">' + initials(data.spender) + '</div>' +
         '<div class="exp-mid"><div class="exp-note">' + (data.note || '') + '</div>' +
         '<div class="exp-meta">' + (data.spender || 'Shared') + (when ? ' · ' + when : '') + '</div></div>' +
-        '<div class="exp-amt mono">' + fmtINR(data.amount) + '</div></div>';
+        '<div class="exp-amt mono">' + fmtINR(data.amount) + '</div>' +
+        '<button class="exp-del" data-id="' + d.id + '" title="Remove entry" aria-label="Remove entry"><svg class="icon"><use href="#i-x"/></svg></button></div>';
     }).join('');
   }
 
@@ -689,6 +727,29 @@
       });
     }).catch(function(){ showWalletUnavailable(); });
   })();
+
+  var armedDeleteId = null, armedDeleteTimer = null;
+  document.getElementById('expenseList').addEventListener('click', function(ev){
+    var btn = ev.target.closest('.exp-del');
+    if (!btn || !walletDb) return;
+    var id = btn.dataset.id;
+    if (armedDeleteId === id) {
+      clearTimeout(armedDeleteTimer);
+      armedDeleteId = null;
+      btn.disabled = true;
+      walletDb.collection('expenses').doc(id).delete().catch(function(){ /* row will simply stay if it fails */ });
+    } else {
+      armedDeleteId = id;
+      btn.classList.add('armed');
+      btn.title = 'Tap again to remove';
+      clearTimeout(armedDeleteTimer);
+      armedDeleteTimer = setTimeout(function(){
+        armedDeleteId = null;
+        btn.classList.remove('armed');
+        btn.title = 'Remove entry';
+      }, 3000);
+    }
+  });
 
   expenseForm.addEventListener('submit', function(ev){
     ev.preventDefault();
