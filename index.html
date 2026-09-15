@@ -5,6 +5,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
   :root{
+    color-scheme: light;
     --bg:#EFF1E4;
     --stage-a:#e7ecdd;
     --stage-b:#f4efe0;
@@ -28,6 +29,7 @@
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
+      color-scheme: dark;
       --bg:#0E1712;
       --stage-a:#0b120e;
       --stage-b:#141f16;
@@ -51,6 +53,7 @@
     }
   }
   :root[data-theme="dark"]{
+    color-scheme: dark;
     --bg:#0E1712;
     --stage-a:#0b120e;
     --stage-b:#141f16;
@@ -190,7 +193,6 @@
   .by-person .bp-amt{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-variant-numeric:tabular-nums; }
 
   .expense-form{ display:flex; flex-direction:column; gap:9px; }
-  .form-row{ display:grid; grid-template-columns:1.3fr 1fr; gap:8px; }
   .expense-form select, .expense-form input{
     width:100%; font-family:'Work Sans', sans-serif; font-size:13px; color:var(--text);
     background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:9px 10px;
@@ -501,15 +503,6 @@
 
       <form class="card expense-form" id="expenseForm">
         <h3 style="margin-bottom:10px;">Log an expense</h3>
-        <div class="form-row">
-          <select id="expSpender" required>
-            <option value="" disabled selected>Who spent?</option>
-            <option>Navin</option>
-            <option>Sankar</option>
-            <option>Ayyappan</option>
-          </select>
-          <input type="number" id="expAmount" placeholder="Amount (₹)" min="0" step="1" inputmode="decimal" required />
-        </div>
         <select id="expNote" required>
           <option value="" disabled selected>What for?</option>
           <option>Tea &amp; Snacks</option>
@@ -528,6 +521,14 @@
           <option value="__other__">Other…</option>
         </select>
         <input type="text" id="expNoteOther" placeholder="Describe the expense" maxlength="60" hidden />
+        <input type="number" id="expAmount" placeholder="Amount (₹)" min="0" step="1" inputmode="decimal" required />
+        <select id="expSpender" required>
+          <option value="" disabled selected>Who spent?</option>
+          <option>Navin</option>
+          <option>Sankar</option>
+          <option>Ayyappan</option>
+        </select>
+        <input type="date" id="expDate" required />
         <button type="submit" class="btn-add"><svg class="icon" style="width:15px;height:15px;"><use href="#i-plus"/></svg> Add expense</button>
         <p id="expenseStatus" class="expense-status" hidden></p>
       </form>
@@ -714,6 +715,15 @@
     if (isOther) expNoteOther.focus();
   });
 
+  var expDateInput = document.getElementById('expDate');
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+  expDateInput.value = todayStr();
+
   var walletMode = 'pending'; // 'live' (synced via Claude) or 'local' (this device only)
   var walletDb = null;
   var expenseForm = document.getElementById('expenseForm');
@@ -728,8 +738,9 @@
     try { localStorage.setItem(LOCAL_EXPENSE_KEY, JSON.stringify(arr)); } catch(e) {}
   }
   function wrapLocalDocs(arr){
-    return arr.slice().sort(function(a, b){ return (b.createdAt || '').localeCompare(a.createdAt || ''); })
-      .map(function(e){ return { id: e.id, data: function(){ return e; } }; });
+    return arr.slice().sort(function(a, b){
+      return ((b.date || '') + b.createdAt).localeCompare((a.date || '') + a.createdAt);
+    }).map(function(e){ return { id: e.id, data: function(){ return e; } }; });
   }
 
   function renderExpenses(docs, live){
@@ -766,7 +777,11 @@
       var data = d.data() || {};
       var famCls = TRAVELERS[data.spender] || 'fam-shared';
       var when = '';
-      try { when = new Date(data.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' }); } catch(e) {}
+      try {
+        var whenSrc = data.date ? (data.date + 'T00:00:00') : data.createdAt;
+        when = new Date(whenSrc).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+        if (when === 'Invalid Date') when = '';
+      } catch(e) {}
       return '<div class="exp-row"><div class="avatar ' + famCls + '">' + initials(data.spender) + '</div>' +
         '<div class="exp-mid"><div class="exp-note">' + (data.note || '') + '</div>' +
         '<div class="exp-meta">' + (data.spender || 'Shared') + (when ? ' · ' + when : '') + '</div></div>' +
@@ -790,7 +805,7 @@
       if (!db) { goLocalWallet(); return; }
       walletMode = 'live';
       walletDb = db;
-      db.collection('expenses').orderBy('createdAt', 'desc').limit(200).onSnapshot(function(snap){
+      db.collection('expenses').orderBy('date', 'desc').limit(200).onSnapshot(function(snap){
         renderExpenses(snap.docs, true);
       }, function(){ goLocalWallet(); });
     }).catch(function(){ goLocalWallet(); });
@@ -828,6 +843,7 @@
   function expenseAdded(){
     expenseForm.reset();
     expNoteOther.hidden = true;
+    expDateInput.value = todayStr();
     expenseStatus.hidden = false;
     expenseStatus.className = 'expense-status ok';
     expenseStatus.textContent = 'Added.';
@@ -846,22 +862,23 @@
     var spender = document.getElementById('expSpender').value;
     var amount = parseFloat(document.getElementById('expAmount').value);
     var note = expNoteSelect.value === '__other__' ? expNoteOther.value.trim() : expNoteSelect.value;
-    if (!spender || !amount || amount <= 0 || !note) {
+    var date = expDateInput.value || todayStr();
+    if (!spender || !amount || amount <= 0 || !note || !date) {
       expenseStatus.hidden = false;
       expenseStatus.className = 'expense-status err';
-      expenseStatus.textContent = 'Fill in who, the amount, and what it was for.';
+      expenseStatus.textContent = 'Fill in what for, the amount, who spent, and the date.';
       return;
     }
     addBtn.disabled = true;
     if (walletMode === 'live' && walletDb) {
       walletDb.collection('expenses').add({
-        spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
+        spender: spender, amount: amount, note: note, date: date, createdAt: new Date().toISOString()
       }).then(expenseAdded).catch(expenseAddFailed);
     } else {
       var arr = localExpenseList();
       arr.push({
         id: 'e' + Date.now() + Math.random().toString(36).slice(2, 7),
-        spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
+        spender: spender, amount: amount, note: note, date: date, createdAt: new Date().toISOString()
       });
       localExpenseSave(arr);
       renderExpenses(wrapLocalDocs(arr), false);
