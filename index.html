@@ -145,10 +145,10 @@
   .pickup-stops{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
   .pickup-stop{ display:flex; align-items:baseline; gap:10px; font-size:13px; }
   .pickup-time{ color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:11.5px; flex:0 0 auto; }
-  .glimpse-card{ display:flex; flex-direction:column; gap:10px; }
-  .glimpse-top{ display:flex; gap:12px; align-items:flex-start; }
-  .glimpse-top h3{ font-size:14.5px; margin-bottom:2px; }
-  .glimpse-btn{ align-self:flex-start; font-size:12.5px; font-weight:600; color:var(--grape); background:var(--grape-soft); border-radius:100px; padding:6px 14px; text-decoration:none; }
+  .glimpse-strip{ position:relative; width:100%; height:132px; flex:0 0 auto; overflow:hidden; background:var(--surface-2); }
+  .glimpse-layer{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.6s ease; }
+  .glimpse-layer.on{ opacity:1; }
+  .glimpse-fade{ position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0) 55%, var(--shell) 100%); pointer-events:none; }
 
   .wallet-preview{ display:flex; flex-direction:column; gap:2px; cursor:pointer; background:linear-gradient(155deg, var(--teal-soft), var(--surface) 75%); }
   .wallet-preview-top{ display:flex; align-items:center; justify-content:space-between; }
@@ -291,11 +291,16 @@
     <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/><path d="M7 7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
-    <symbol id="i-photos" viewBox="0 0 24 24"><rect x="3" y="6" width="15" height="13" rx="2"/><path d="M8 15l2.5-3 2 2 2.5-3.5L18 15"/><circle cx="8.5" cy="10" r="1.2"/><path d="M7 6V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v9"/></symbol>
   </defs>
 </svg>
 
 <div class="app" id="app">
+
+  <div class="glimpse-strip" id="glimpseStrip" aria-hidden="true">
+    <img class="glimpse-layer on" id="glimpseA" alt="" />
+    <img class="glimpse-layer" id="glimpseB" alt="" />
+    <div class="glimpse-fade"></div>
+  </div>
 
   <header class="app-header">
     <div class="header-top">
@@ -351,17 +356,6 @@
           <div class="hl grape"><div class="icon-wrap"><svg class="icon"><use href="#i-grape"/></svg></div><b>Cumbum Grapes</b><span>Theni's vineyard belt — farm walk &amp; tasting</span></div>
           <div class="hl grape"><div class="icon-wrap"><svg class="icon"><use href="#i-temple"/></svg></div><b>Saneeswaran Temple</b><span>Morning darshan in Theni's temple town</span></div>
         </div>
-      </div>
-
-      <div class="card glimpse-card" id="glimpseCard">
-        <div class="glimpse-top">
-          <div class="icon-wrap" style="background:var(--grape-soft); color:var(--grape);"><svg class="icon"><use href="#i-photos"/></svg></div>
-          <div>
-            <h3>Earlier trip, a glimpse</h3>
-            <p id="glimpseSub" style="margin:0;">Photos from a previous family trip — link coming soon.</p>
-          </div>
-        </div>
-        <a id="glimpseLink" class="glimpse-btn" href="#" target="_blank" rel="noopener" hidden>Open the album ↗</a>
       </div>
 
       <div class="card">
@@ -520,6 +514,7 @@
 </div>
 
 <script src="photos.js"></script>
+<script src="glimpse.js"></script>
 <script>
 (function(){
   var days = [
@@ -570,14 +565,28 @@
 
   var PHOTOS = window.__TRIP_PHOTOS__ || {};
 
-  // Paste the shared Drive/Photos link between the quotes below to activate the "Earlier trip" card.
-  var EARLIER_TRIP_ALBUM_URL = '';
-  if (EARLIER_TRIP_ALBUM_URL) {
-    document.getElementById('glimpseSub').textContent = 'A few photos from a previous family trip.';
-    var glimpseLink = document.getElementById('glimpseLink');
-    glimpseLink.href = EARLIER_TRIP_ALBUM_URL;
-    glimpseLink.hidden = false;
-  }
+  // ---- Glimpse strip: earlier-trip photos, random order, no captions ----
+  (function initGlimpse(){
+    var pool = (window.__GLIMPSE_PHOTOS__ || []).slice();
+    if (!pool.length) { var el = document.getElementById('glimpseStrip'); if (el) el.hidden = true; return; }
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    }
+    var layers = [document.getElementById('glimpseA'), document.getElementById('glimpseB')];
+    var onLayer = 0;
+    var idx = 0;
+    layers[0].src = pool[idx % pool.length];
+    function next(){
+      idx++;
+      var offLayer = 1 - onLayer;
+      layers[offLayer].src = pool[idx % pool.length];
+      layers[offLayer].classList.add('on');
+      layers[onLayer].classList.remove('on');
+      onLayer = offLayer;
+    }
+    setInterval(next, 3800);
+  })();
 
   var railEl = document.getElementById('dayRail');
   var tagEl = document.getElementById('dayTag');
