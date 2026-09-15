@@ -170,7 +170,7 @@
   .pickup-stops{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
   .pickup-stop{ display:flex; align-items:baseline; gap:10px; font-size:13px; }
   .pickup-time{ color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:11.5px; flex:0 0 auto; }
-  .glimpse-strip{ position:relative; width:100%; height:132px; flex:0 0 auto; overflow:hidden; background:var(--surface-2); }
+  .glimpse-strip{ position:relative; width:calc(100% + 44px); margin:-18px -22px 0; height:132px; flex:0 0 auto; overflow:hidden; background:var(--surface-2); }
   .glimpse-layer{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.6s ease; }
   .glimpse-layer.on{ opacity:1; }
   @media (max-width:480px){
@@ -323,11 +323,6 @@
 
 <div class="app" id="app">
 
-  <div class="glimpse-strip" id="glimpseStrip" aria-hidden="true">
-    <img class="glimpse-layer on" id="glimpseA" alt="" />
-    <img class="glimpse-layer" id="glimpseB" alt="" />
-  </div>
-
   <header class="app-header">
     <div class="header-top">
       <h1>Vagamon &amp; Cumbum</h1>
@@ -343,6 +338,11 @@
 
     <!-- OVERVIEW -->
     <section class="panel active" data-panel="overview">
+      <div class="glimpse-strip" id="glimpseStrip" aria-hidden="true">
+        <img class="glimpse-layer on" id="glimpseA" alt="" />
+        <img class="glimpse-layer" id="glimpseB" alt="" />
+      </div>
+
       <div class="stat-row">
         <div class="stat"><b>5</b><span>Days</span></div>
         <div class="stat"><b>3</b><span>Homes</span></div>
@@ -608,12 +608,10 @@
 
   var PHOTOS = window.__TRIP_PHOTOS__ || {};
 
-  // ---- Glimpse strip: earlier-trip photos, random order, no captions. Overview tab only. ----
-  var glimpseAvailable = false;
+  // ---- Glimpse strip: earlier-trip photos, random order, no captions. Lives inside the Overview panel, scrolls with it. ----
   (function initGlimpse(){
     var pool = (window.__GLIMPSE_PHOTOS__ || []).slice();
     if (!pool.length) { var el = document.getElementById('glimpseStrip'); if (el) el.hidden = true; return; }
-    glimpseAvailable = true;
     for (var i = pool.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
       var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
@@ -691,8 +689,6 @@
   function selectTab(name){
     tabBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.tab === name); });
     panels.forEach(function(p){ p.classList.toggle('active', p.dataset.panel === name); });
-    var gs = document.getElementById('glimpseStrip');
-    if (gs) gs.hidden = !(name === 'overview' && glimpseAvailable);
     try { localStorage.setItem('vc-loop-tab', name); } catch(e) {}
   }
   tabBtns.forEach(function(b){
@@ -725,12 +721,25 @@
     if (isOther) expNoteOther.focus();
   });
 
+  var walletMode = 'pending'; // 'live' (synced via Claude) or 'local' (this device only)
   var walletDb = null;
   var expenseForm = document.getElementById('expenseForm');
   var expenseStatus = document.getElementById('expenseStatus');
   var addBtn = expenseForm.querySelector('.btn-add');
 
-  function renderExpenses(docs){
+  var LOCAL_EXPENSE_KEY = 'vc-loop-expenses';
+  function localExpenseList(){
+    try { return JSON.parse(localStorage.getItem(LOCAL_EXPENSE_KEY) || '[]'); } catch(e) { return []; }
+  }
+  function localExpenseSave(arr){
+    try { localStorage.setItem(LOCAL_EXPENSE_KEY, JSON.stringify(arr)); } catch(e) {}
+  }
+  function wrapLocalDocs(arr){
+    return arr.slice().sort(function(a, b){ return (b.createdAt || '').localeCompare(a.createdAt || ''); })
+      .map(function(e){ return { id: e.id, data: function(){ return e; } }; });
+  }
+
+  function renderExpenses(docs, live){
     var total = 0, byPerson = {};
     docs.forEach(function(d){
       var data = d.data() || {};
@@ -742,7 +751,8 @@
 
     document.getElementById('walletTotal').textContent = fmtINR(total);
     document.getElementById('walletSub').textContent = docs.length +
-      (docs.length === 1 ? ' entry logged' : ' entries logged') + ' · updates live for everyone';
+      (docs.length === 1 ? ' entry logged' : ' entries logged') +
+      (live ? ' · syncs live for everyone on this link' : ' · saved on this device only');
     document.getElementById('ovwTotal').textContent = fmtINR(total);
     document.getElementById('ovwSub').textContent = docs.length ?
       ('spent so far, ' + docs.length + ' entries — tap to add or view') : 'nothing logged yet — tap to add';
@@ -772,36 +782,43 @@
     }).join('');
   }
 
-  function showWalletUnavailable(msg){
-    document.getElementById('walletSub').textContent = msg || 'Live sync isn\'t available in this view.';
-    document.getElementById('expenseList').innerHTML =
-      '<p style="font-size:12.5px;color:var(--text-dim);margin:0;">Sign in with your trip\'s Claude account to add or see shared expenses here.</p>';
-    if (addBtn) addBtn.disabled = true;
+  // The Add Expense CTA always works for whoever opens this link: when a live,
+  // synced ledger is available (inside the Claude app) it's used; otherwise
+  // expenses are kept on that visitor's own device so the feature never blocks.
+  function goLocalWallet(){
+    walletMode = 'local';
+    addBtn.disabled = false;
+    renderExpenses(wrapLocalDocs(localExpenseList()), false);
   }
 
-  (function initDb(){
-    if (!window.claude || typeof window.claude.use !== 'function') { showWalletUnavailable(); return; }
+  (function initWallet(){
+    if (!window.claude || typeof window.claude.use !== 'function') { goLocalWallet(); return; }
     window.claude.use('db').then(function(db){
-      if (!db) { showWalletUnavailable(); return; }
+      if (!db) { goLocalWallet(); return; }
+      walletMode = 'live';
       walletDb = db;
       db.collection('expenses').orderBy('createdAt', 'desc').limit(200).onSnapshot(function(snap){
-        renderExpenses(snap.docs);
-      }, function(err){
-        showWalletUnavailable('Couldn\'t load shared expenses (' + err.code + ').');
-      });
-    }).catch(function(){ showWalletUnavailable(); });
+        renderExpenses(snap.docs, true);
+      }, function(){ goLocalWallet(); });
+    }).catch(function(){ goLocalWallet(); });
   })();
 
   var armedDeleteId = null, armedDeleteTimer = null;
   document.getElementById('expenseList').addEventListener('click', function(ev){
     var btn = ev.target.closest('.exp-del');
-    if (!btn || !walletDb) return;
+    if (!btn) return;
     var id = btn.dataset.id;
     if (armedDeleteId === id) {
       clearTimeout(armedDeleteTimer);
       armedDeleteId = null;
       btn.disabled = true;
-      walletDb.collection('expenses').doc(id).delete().catch(function(){ /* row will simply stay if it fails */ });
+      if (walletMode === 'live' && walletDb) {
+        walletDb.collection('expenses').doc(id).delete().catch(function(){ /* row will simply stay if it fails */ });
+      } else {
+        var remaining = localExpenseList().filter(function(e){ return e.id !== id; });
+        localExpenseSave(remaining);
+        renderExpenses(wrapLocalDocs(remaining), false);
+      }
     } else {
       armedDeleteId = id;
       btn.classList.add('armed');
@@ -815,9 +832,24 @@
     }
   });
 
+  function expenseAdded(){
+    expenseForm.reset();
+    expNoteOther.hidden = true;
+    expenseStatus.hidden = false;
+    expenseStatus.className = 'expense-status ok';
+    expenseStatus.textContent = 'Added.';
+    addBtn.disabled = false;
+    setTimeout(function(){ expenseStatus.hidden = true; }, 2500);
+  }
+  function expenseAddFailed(err){
+    expenseStatus.hidden = false;
+    expenseStatus.className = 'expense-status err';
+    expenseStatus.textContent = 'Could not save (' + ((err && err.code) || 'error') + ') — try again.';
+    addBtn.disabled = false;
+  }
+
   expenseForm.addEventListener('submit', function(ev){
     ev.preventDefault();
-    if (!walletDb) { showWalletUnavailable(); return; }
     var spender = document.getElementById('expSpender').value;
     var amount = parseFloat(document.getElementById('expAmount').value);
     var note = expNoteSelect.value === '__other__' ? expNoteOther.value.trim() : expNoteSelect.value;
@@ -828,22 +860,20 @@
       return;
     }
     addBtn.disabled = true;
-    walletDb.collection('expenses').add({
-      spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
-    }).then(function(){
-      expenseForm.reset();
-      expNoteOther.hidden = true;
-      expenseStatus.hidden = false;
-      expenseStatus.className = 'expense-status ok';
-      expenseStatus.textContent = 'Added.';
-      addBtn.disabled = false;
-      setTimeout(function(){ expenseStatus.hidden = true; }, 2500);
-    }).catch(function(err){
-      expenseStatus.hidden = false;
-      expenseStatus.className = 'expense-status err';
-      expenseStatus.textContent = 'Could not save (' + ((err && err.code) || 'error') + ') — try again.';
-      addBtn.disabled = false;
-    });
+    if (walletMode === 'live' && walletDb) {
+      walletDb.collection('expenses').add({
+        spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
+      }).then(expenseAdded).catch(expenseAddFailed);
+    } else {
+      var arr = localExpenseList();
+      arr.push({
+        id: 'e' + Date.now() + Math.random().toString(36).slice(2, 7),
+        spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
+      });
+      localExpenseSave(arr);
+      renderExpenses(wrapLocalDocs(arr), false);
+      expenseAdded();
+    }
   });
 
   function updateCountdown(){
