@@ -146,6 +146,9 @@
   .pickup-stop{ display:flex; align-items:baseline; gap:10px; font-size:13px; }
   .pickup-time{ color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:11.5px; flex:0 0 auto; }
   .glimpse-strip{ position:relative; width:100%; height:132px; flex:0 0 auto; overflow:hidden; background:var(--surface-2); }
+  @media (max-width:480px){
+    .glimpse-strip{ height:220px; }
+  }
   .glimpse-layer{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.6s ease; }
   .glimpse-layer.on{ opacity:1; }
   .glimpse-fade{ position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0) 55%, var(--shell) 100%); pointer-events:none; }
