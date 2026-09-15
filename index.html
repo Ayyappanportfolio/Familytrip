@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vagamon–Cumbum Loop</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
@@ -162,10 +164,8 @@
   .glimpse-strip{ position:relative; width:100%; height:132px; flex:0 0 auto; overflow:hidden; background:var(--surface-2); }
   .glimpse-layer{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.6s ease; }
   .glimpse-layer.on{ opacity:1; }
-  .glimpse-fade{ position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0) 55%, var(--shell) 100%); pointer-events:none; }
   @media (max-width:480px){
-    .glimpse-strip{ height:320px; }
-    .glimpse-fade{ background:linear-gradient(to bottom, rgba(0,0,0,0) 62%, var(--shell) 100%); }
+    .glimpse-strip{ height:400px; }
   }
 
   .wallet-preview{ display:flex; flex-direction:column; gap:2px; cursor:pointer; background:linear-gradient(155deg, var(--teal-soft), var(--surface) 75%); }
@@ -317,7 +317,6 @@
   <div class="glimpse-strip" id="glimpseStrip" aria-hidden="true">
     <img class="glimpse-layer on" id="glimpseA" alt="" />
     <img class="glimpse-layer" id="glimpseB" alt="" />
-    <div class="glimpse-fade"></div>
   </div>
 
   <header class="app-header">
@@ -509,7 +508,24 @@
           </select>
           <input type="number" id="expAmount" placeholder="Amount (₹)" min="0" step="1" inputmode="decimal" required />
         </div>
-        <input type="text" id="expNote" placeholder="What for? e.g. Fuel, Vagamon lunch" maxlength="80" required />
+        <select id="expNote" required>
+          <option value="" disabled selected>What for?</option>
+          <option>Tea &amp; Snacks</option>
+          <option>Breakfast</option>
+          <option>Lunch</option>
+          <option>Dinner</option>
+          <option>Hotel Stay</option>
+          <option>Tempo Traveller</option>
+          <option>Parking</option>
+          <option>Fastag</option>
+          <option>Kerala Entry Fee</option>
+          <option>Garden Entry Ticket</option>
+          <option>Fuel</option>
+          <option>Activity</option>
+          <option>Jeep Safari</option>
+          <option value="__other__">Other…</option>
+        </select>
+        <input type="text" id="expNoteOther" placeholder="Describe the expense" maxlength="60" hidden />
         <button type="submit" class="btn-add"><svg class="icon" style="width:15px;height:15px;"><use href="#i-plus"/></svg> Add expense</button>
         <p id="expenseStatus" class="expense-status" hidden></p>
       </form>
@@ -688,6 +704,14 @@
     el.addEventListener('click', function(){ selectTab(el.dataset.goto); });
   });
 
+  var expNoteSelect = document.getElementById('expNote');
+  var expNoteOther = document.getElementById('expNoteOther');
+  expNoteSelect.addEventListener('change', function(){
+    var isOther = expNoteSelect.value === '__other__';
+    expNoteOther.hidden = !isOther;
+    if (isOther) expNoteOther.focus();
+  });
+
   var walletDb = null;
   var expenseForm = document.getElementById('expenseForm');
   var expenseStatus = document.getElementById('expenseStatus');
@@ -783,7 +807,7 @@
     if (!walletDb) { showWalletUnavailable(); return; }
     var spender = document.getElementById('expSpender').value;
     var amount = parseFloat(document.getElementById('expAmount').value);
-    var note = document.getElementById('expNote').value.trim();
+    var note = expNoteSelect.value === '__other__' ? expNoteOther.value.trim() : expNoteSelect.value;
     if (!spender || !amount || amount <= 0 || !note) {
       expenseStatus.hidden = false;
       expenseStatus.className = 'expense-status err';
@@ -795,6 +819,7 @@
       spender: spender, amount: amount, note: note, createdAt: new Date().toISOString()
     }).then(function(){
       expenseForm.reset();
+      expNoteOther.hidden = true;
       expenseStatus.hidden = false;
       expenseStatus.className = 'expense-status ok';
       expenseStatus.textContent = 'Added.';
