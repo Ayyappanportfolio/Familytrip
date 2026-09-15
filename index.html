@@ -504,16 +504,9 @@
         <div class="form-row">
           <select id="expSpender" required>
             <option value="" disabled selected>Who spent?</option>
-            <optgroup label="Sankar's family">
-              <option>Sankar</option><option>Saradha</option><option>Shravan</option><option>Sudhan</option>
-            </optgroup>
-            <optgroup label="Navin's family">
-              <option>Navin</option><option>Brindha</option><option>Aarush</option>
-            </optgroup>
-            <optgroup label="Ayyappan's family">
-              <option>Ayyappan</option><option>Raji</option><option>Thugi</option><option>Nilan</option>
-            </optgroup>
-            <option value="Shared">Shared / common fund</option>
+            <option>Navin</option>
+            <option>Sankar</option>
+            <option>Ayyappan</option>
           </select>
           <input type="number" id="expAmount" placeholder="Amount (₹)" min="0" step="1" inputmode="decimal" required />
         </div>
@@ -540,7 +533,7 @@
       </form>
 
       <div class="card">
-        <h3 style="margin-bottom:8px;">Recent entries</h3>
+        <h3 style="margin-bottom:8px;">Expense Details</h3>
         <div id="expenseList" class="expense-list"><p style="font-size:12.5px;color:var(--text-dim);margin:0;">Connecting…</p></div>
       </div>
     </section>
