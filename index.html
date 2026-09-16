@@ -209,6 +209,7 @@
   .exp-row .avatar{ width:26px; height:26px; font-size:10px; flex:0 0 auto; }
   .exp-row .exp-mid{ flex:1 1 auto; min-width:0; }
   .exp-row .exp-note{ font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .exp-row .exp-comment{ font-size:11.5px; color:var(--text-dim); font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .exp-row .exp-meta{ font-size:11px; color:var(--text-dim); }
   .exp-row .exp-amt{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; flex:0 0 auto; }
   .exp-del{ flex:0 0 auto; width:26px; height:26px; border-radius:8px; border:none; background:none; color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
@@ -505,22 +506,19 @@
         <h3 style="margin-bottom:10px;">Log an expense</h3>
         <select id="expNote" required>
           <option value="" disabled selected>What for?</option>
-          <option>Tea &amp; Snacks</option>
-          <option>Breakfast</option>
+          <option>Tea, Snacks</option>
+          <option>Water Can</option>
+          <option>Snacks</option>
+          <option>Room stay</option>
           <option>Lunch</option>
+          <option>Breakfast</option>
           <option>Dinner</option>
-          <option>Hotel Stay</option>
+          <option>Tips</option>
+          <option>Entry Tickets</option>
           <option>Tempo Traveller</option>
-          <option>Parking</option>
-          <option>Fastag</option>
-          <option>Kerala Entry Fee</option>
-          <option>Garden Entry Ticket</option>
-          <option>Fuel</option>
-          <option>Activity</option>
-          <option>Jeep Safari</option>
-          <option value="__other__">Other…</option>
+          <option>Diesel</option>
+          <option>Toll Charges</option>
         </select>
-        <input type="text" id="expNoteOther" placeholder="Describe the expense" maxlength="60" hidden />
         <input type="number" id="expAmount" placeholder="Amount (₹)" min="0" step="1" inputmode="decimal" required />
         <select id="expSpender" required>
           <option value="" disabled selected>Who spent?</option>
@@ -529,6 +527,7 @@
           <option>Ayyappan</option>
         </select>
         <input type="date" id="expDate" required />
+        <input type="text" id="expComment" placeholder="Comments (optional)" maxlength="120" />
         <button type="submit" class="btn-add"><svg class="icon" style="width:15px;height:15px;"><use href="#i-plus"/></svg> Add expense</button>
         <p id="expenseStatus" class="expense-status" hidden></p>
       </form>
@@ -702,18 +701,18 @@
   };
   function fmtINR(n){ return '₹' + Math.round(n || 0).toLocaleString('en-IN'); }
   function initials(name){ return (name || '?').charAt(0).toUpperCase(); }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
 
   document.querySelectorAll('[data-goto]').forEach(function(el){
     el.addEventListener('click', function(){ selectTab(el.dataset.goto); });
   });
 
   var expNoteSelect = document.getElementById('expNote');
-  var expNoteOther = document.getElementById('expNoteOther');
-  expNoteSelect.addEventListener('change', function(){
-    var isOther = expNoteSelect.value === '__other__';
-    expNoteOther.hidden = !isOther;
-    if (isOther) expNoteOther.focus();
-  });
+  var expCommentInput = document.getElementById('expComment');
 
   var expDateInput = document.getElementById('expDate');
   function todayStr(){
@@ -782,8 +781,10 @@
         when = new Date(whenSrc).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
         if (when === 'Invalid Date') when = '';
       } catch(e) {}
+      var commentHtml = data.comment ? '<div class="exp-comment">' + escapeHtml(data.comment) + '</div>' : '';
       return '<div class="exp-row"><div class="avatar ' + famCls + '">' + initials(data.spender) + '</div>' +
         '<div class="exp-mid"><div class="exp-note">' + (data.note || '') + '</div>' +
+        commentHtml +
         '<div class="exp-meta">' + (data.spender || 'Shared') + (when ? ' · ' + when : '') + '</div></div>' +
         '<div class="exp-amt mono">' + fmtINR(data.amount) + '</div>' +
         '<button class="exp-del" data-id="' + d.id + '" title="Remove entry" aria-label="Remove entry"><svg class="icon"><use href="#i-x"/></svg></button></div>';
@@ -842,7 +843,6 @@
 
   function expenseAdded(){
     expenseForm.reset();
-    expNoteOther.hidden = true;
     expDateInput.value = todayStr();
     expenseStatus.hidden = false;
     expenseStatus.className = 'expense-status ok';
@@ -861,8 +861,9 @@
     ev.preventDefault();
     var spender = document.getElementById('expSpender').value;
     var amount = parseFloat(document.getElementById('expAmount').value);
-    var note = expNoteSelect.value === '__other__' ? expNoteOther.value.trim() : expNoteSelect.value;
+    var note = expNoteSelect.value;
     var date = expDateInput.value || todayStr();
+    var comment = expCommentInput.value.trim();
     if (!spender || !amount || amount <= 0 || !note || !date) {
       expenseStatus.hidden = false;
       expenseStatus.className = 'expense-status err';
@@ -872,13 +873,13 @@
     addBtn.disabled = true;
     if (walletMode === 'live' && walletDb) {
       walletDb.collection('expenses').add({
-        spender: spender, amount: amount, note: note, date: date, createdAt: new Date().toISOString()
+        spender: spender, amount: amount, note: note, date: date, comment: comment, createdAt: new Date().toISOString()
       }).then(expenseAdded).catch(expenseAddFailed);
     } else {
       var arr = localExpenseList();
       arr.push({
         id: 'e' + Date.now() + Math.random().toString(36).slice(2, 7),
-        spender: spender, amount: amount, note: note, date: date, createdAt: new Date().toISOString()
+        spender: spender, amount: amount, note: note, date: date, comment: comment, createdAt: new Date().toISOString()
       });
       localExpenseSave(arr);
       renderExpenses(wrapLocalDocs(arr), false);
