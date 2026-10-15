@@ -181,7 +181,7 @@
 
   .driver-box{ background:var(--surface-2); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
   .driver-row{ display:flex; align-items:flex-start; gap:10px; font-size:13px; }
-  .driver-label{ width:54px; flex:0 0 auto; padding-top:2px; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
+  .driver-label{ width:64px; flex:0 0 auto; padding-top:2px; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
   .driver-val{ color:var(--text); font-weight:600; }
   .driver-calls{ display:flex; flex-direction:column; gap:6px; }
   .driver-call{ display:flex; align-items:center; gap:6px; color:var(--text); text-decoration:none; font-size:13px; font-weight:600; }
@@ -420,6 +420,29 @@
         <p>One Tempo Traveller does the full round, then it's straight down NH38 toward the Ghats. First long halt is breakfast past Dindigul.</p>
       </div>
 
+      <div class="card stay-card">
+        <div class="pickup-head">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-home"/></svg></div>
+          <h3>Vagamon stay</h3>
+        </div>
+        <div class="driver-box" style="margin-bottom:0;">
+          <div class="driver-row"><span class="driver-label">Stay</span><span class="driver-val">The Bond Holidays</span></div>
+          <div class="driver-row"><span class="driver-label">Dates</span><span class="driver-val">Oct 16 – 18 · 2 nights</span></div>
+          <div class="driver-row"><span class="driver-label">Contact</span><span class="driver-val">Surya</span></div>
+          <div class="driver-row">
+            <span class="driver-label">Call</span>
+            <div class="driver-calls">
+              <a class="driver-call mono" href="tel:+918940487802"><svg class="icon"><use href="#i-phone"/></svg>89404 87802</a>
+            </div>
+          </div>
+          <div class="driver-row" style="align-items:center;">
+            <span class="driver-label">Map</span>
+            <a class="driver-call" style="flex:1;" href="https://www.google.com/maps?q=9.6617991,76.9215894&amp;z=17&amp;hl=en" target="_blank" rel="noopener"><svg class="icon"><use href="#i-pin"/></svg>Open in Maps</a>
+            <button type="button" class="pickup-copy" data-url="https://www.google.com/maps?q=9.6617991,76.9215894&amp;z=17&amp;hl=en" title="Copy stay location link" aria-label="Copy stay location link"><svg class="icon"><use href="#i-copy"/></svg></button>
+          </div>
+        </div>
+      </div>
+
       <div class="card wallet-preview" data-goto="wallet">
         <div class="wallet-preview-top">
           <span class="eyebrow">Trip wallet</span>
@@ -638,7 +661,7 @@
       {t:'8:30 AM', title:'Breakfast halt', note:'Highway stop past the Dindigul stretch.', icon:'i-fork', cls:'tag-food', pill:'food'},
       {t:'1:00 PM', title:'Lunch halt, Theni belt', note:'Last flat-road meal before the ghat climb starts.', icon:'i-fork', cls:'tag-food', pill:'food'},
       {t:'4:00 PM', title:'Ghat climb begins', note:'Vandiperiyar → Vagamon hill road — slow down for the curves.', icon:'i-car', cls:'tag-drive', pill:'drive'},
-      {t:'6:00 PM', title:'Arrive Vagamon', note:'Check in, then evening tea with the meadow view.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
+      {t:'6:00 PM', title:'Arrive Vagamon', note:'Check in at The Bond Holidays, then evening tea with the meadow view.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
     ]},
     { date:'Oct 17', dow:'Sat', tag:'Vagamon', note:'Suggested spots for today — swap freely to suit the group\'s pace.', stops:[
       {t:'7:30 AM', title:'Vagamon Meadows', note:'Sunrise over the rolling grass hills — best light of the day.', icon:'i-leaf', cls:'tag-see', pill:'see', photo:'vagamon_meadows'},
