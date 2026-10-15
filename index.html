@@ -183,6 +183,7 @@
   .driver-row{ display:flex; align-items:flex-start; gap:10px; font-size:13px; }
   .driver-label{ width:64px; flex:0 0 auto; padding-top:2px; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
   .driver-val{ color:var(--text); font-weight:600; }
+  .driver-addr{ flex:1; min-width:0; color:var(--text); line-height:1.45; }
   .driver-calls{ display:flex; flex-direction:column; gap:6px; }
   .driver-call{ display:flex; align-items:center; gap:6px; color:var(--text); text-decoration:none; font-size:13px; font-weight:600; }
   .driver-call .icon{ width:14px; height:14px; color:var(--teal); }
@@ -443,6 +444,33 @@
         </div>
       </div>
 
+      <div class="card stay-card">
+        <div class="pickup-head">
+          <div class="icon-wrap"><svg class="icon"><use href="#i-home"/></svg></div>
+          <h3>Cumbum stay</h3>
+        </div>
+        <div class="driver-box" style="margin-bottom:0;">
+          <div class="driver-row"><span class="driver-label">Stay</span><span class="driver-val">Green Park</span></div>
+          <div class="driver-row"><span class="driver-label">Dates</span><span class="driver-val">Oct 18 – 20 · 2 nights</span></div>
+          <div class="driver-row"><span class="driver-label">Contact</span><span class="driver-val">Siddhiq</span></div>
+          <div class="driver-row">
+            <span class="driver-label">Call</span>
+            <div class="driver-calls">
+              <a class="driver-call mono" href="tel:+919597564164"><svg class="icon"><use href="#i-phone"/></svg>95975 64164</a>
+            </div>
+          </div>
+          <div class="driver-row">
+            <span class="driver-label">Address</span>
+            <span class="driver-addr">No. 81, Kuttaiya Street, opp. to Mohanasundaram Hospital, Maalaikkovil, Cumbum, Tamil Nadu 625516</span>
+          </div>
+          <div class="driver-row" style="align-items:center;">
+            <span class="driver-label">Map</span>
+            <a class="driver-call" style="flex:1;" href="https://www.google.com/maps/search/?api=1&amp;query=Green%20Park%2C%20No.%2081%2C%20Kuttaiya%20Street%2C%20Maalaikkovil%2C%20Cumbum%2C%20Tamil%20Nadu%20625516" target="_blank" rel="noopener"><svg class="icon"><use href="#i-pin"/></svg>Open in Maps</a>
+            <button type="button" class="pickup-copy" data-url="Green Park, No. 81, Kuttaiya Street, opp. to Mohanasundaram Hospital, Maalaikkovil, Cumbum, Tamil Nadu 625516" title="Copy address" aria-label="Copy address"><svg class="icon"><use href="#i-copy"/></svg></button>
+          </div>
+        </div>
+      </div>
+
       <div class="card wallet-preview" data-goto="wallet">
         <div class="wallet-preview-top">
           <span class="eyebrow">Trip wallet</span>
@@ -679,7 +707,7 @@
       {t:'1:30 PM', title:'Vagamon Glass Bridge', note:'The glass-floor skywalk everyone\'s been posting about — great for photos.', icon:'i-peak', cls:'tag-see', pill:'see', photo:'vagamon_glass_bridge'},
       {t:'3:00 PM', title:'Ilaveezha Poonchira', note:'A quieter valley viewpoint a little out of town — worth the detour.', icon:'i-leaf', cls:'tag-see', pill:'see', photo:'ilaveezha_poonchira'},
       {t:'5:00 PM', title:'Depart for Cumbum', note:'Back through the Vandiperiyar–Kumily ghat road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
-      {t:'7:30 PM', title:'Arrive Cumbum', note:'Check in, dinner, early night — full day tomorrow.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
+      {t:'7:30 PM', title:'Arrive Cumbum', note:'Check in at Green Park, dinner, early night — full day tomorrow.', icon:'i-cup', cls:'tag-rest', pill:'rest'}
     ]},
     { date:'Oct 19', dow:'Mon', tag:'Cumbum · Megamalai', note:null, stops:[
       {t:'7:00 AM', title:'Depart for Suruli Falls', note:'First stop on the Megamalai road.', icon:'i-car', cls:'tag-drive', pill:'drive'},
