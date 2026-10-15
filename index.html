@@ -178,6 +178,28 @@
   .pickup-copy{ flex:0 0 auto; width:26px; height:26px; border-radius:8px; border:none; background:var(--surface-2); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
   .pickup-copy .icon{ width:13px; height:13px; }
   .pickup-copy.copied{ background:var(--teal-soft); color:var(--teal); }
+
+  .driver-box{ background:var(--surface-2); border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
+  .driver-row{ display:flex; align-items:flex-start; gap:10px; font-size:13px; }
+  .driver-label{ width:54px; flex:0 0 auto; padding-top:2px; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); }
+  .driver-val{ color:var(--text); font-weight:600; }
+  .driver-calls{ display:flex; flex-direction:column; gap:6px; }
+  .driver-call{ display:flex; align-items:center; gap:6px; color:var(--text); text-decoration:none; font-size:13px; font-weight:600; }
+  .driver-call .icon{ width:14px; height:14px; color:var(--teal); }
+  .driver-call:hover{ text-decoration:underline; }
+
+  .ess-head{ display:flex; flex-direction:column; gap:6px; }
+  .ess-count{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .ess-bar{ height:6px; border-radius:100px; background:var(--surface-2); overflow:hidden; }
+  .ess-bar-fill{ height:100%; width:0; background:var(--teal); border-radius:100px; transition:width .3s ease; }
+  .ess-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .ess-list li{ border-bottom:1px solid var(--line); }
+  .ess-list li:last-child{ border-bottom:none; }
+  .ess-item{ display:flex; align-items:flex-start; gap:12px; padding:12px 0; cursor:pointer; }
+  .ess-item input{ width:20px; height:20px; margin:1px 0 0; flex:0 0 auto; accent-color:var(--teal); cursor:pointer; }
+  .ess-text{ flex:1; min-width:0; font-size:14px; line-height:1.4; }
+  .ess-who{ flex:0 0 auto; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:var(--accent-soft); color:var(--accent-ink); border-radius:100px; padding:3px 9px; margin-top:1px; }
+  .ess-item input:checked + .ess-text{ color:var(--text-dim); text-decoration:line-through; }
   .pickup-time{ color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:1px 6px; font-size:11.5px; flex:0 0 auto; }
   .glimpse-strip{ position:relative; width:calc(100% + 44px); margin:-18px -22px 0; height:132px; flex:0 0 auto; overflow:hidden; background:var(--surface-2); }
   .glimpse-layer{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.6s ease; }
@@ -327,6 +349,8 @@
     <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.5" cy="14.5" r="1.3"/><path d="M7 7V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M4 13h16"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M6 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v2"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-7.1 7-12a7 7 0 1 0-14 0c0 4.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.4"/></symbol>
   </defs>
@@ -374,6 +398,17 @@
           </div>
           <div class="pickup-stop"><span class="mono pickup-time">5:30 AM</span><span>Navin's home</span></div>
           <div class="pickup-stop"><span class="mono pickup-time">6:00 AM</span><span>Sankar's home, Velachery</span></div>
+        </div>
+        <div class="driver-box">
+          <div class="driver-row"><span class="driver-label">Vehicle</span><span class="mono driver-val">TN 02 CH 3021</span></div>
+          <div class="driver-row"><span class="driver-label">Driver</span><span class="driver-val">Sathish</span></div>
+          <div class="driver-row">
+            <span class="driver-label">Call</span>
+            <div class="driver-calls">
+              <a class="driver-call mono" href="tel:+919791050750"><svg class="icon"><use href="#i-phone"/></svg>+91 9791050750</a>
+              <a class="driver-call mono" href="tel:+918667871267"><svg class="icon"><use href="#i-phone"/></svg>+91 8667871267</a>
+            </div>
+          </div>
         </div>
         <p>One Tempo Traveller does the full round, then it's straight down NH38 toward the Ghats. First long halt is breakfast past Dindigul.</p>
       </div>
@@ -480,6 +515,19 @@
     </section>
 
     <!-- CREW -->
+    <!-- ESSENTIALS -->
+    <section class="panel" data-panel="essentials">
+      <div class="card ess-head">
+        <span class="eyebrow">Essentials to bring</span>
+        <b class="ess-count" id="essCount">0 of 9 packed</b>
+        <div class="ess-bar"><div class="ess-bar-fill" id="essBar"></div></div>
+      </div>
+      <div class="card">
+        <ul class="ess-list" id="essList"></ul>
+      </div>
+      <p style="font-size:11.5px; color:var(--text-dim); text-align:center; margin:0;">Ticks are saved on this device only.</p>
+    </section>
+
     <section class="panel" data-panel="crew">
       <div class="fam-card fam-a">
         <div class="fam-head"><h3>Sankar's Family</h3><span class="fam-tag">Velachery</span></div>
@@ -562,6 +610,7 @@
   <nav class="tabbar">
     <button class="tab-btn active" data-tab="overview"><svg class="icon"><use href="#i-home"/></svg><span>Overview</span></button>
     <button class="tab-btn" data-tab="itinerary"><svg class="icon"><use href="#i-list"/></svg><span>Itinerary</span></button>
+    <button class="tab-btn" data-tab="essentials"><svg class="icon"><use href="#i-bag"/></svg><span>Essentials</span></button>
     <button class="tab-btn" data-tab="wallet"><svg class="icon"><use href="#i-wallet"/></svg><span>Wallet</span></button>
     <button class="tab-btn" data-tab="map"><svg class="icon"><use href="#i-map"/></svg><span>Map</span></button>
     <button class="tab-btn" data-tab="crew"><svg class="icon"><use href="#i-users"/></svg><span>Crew</span></button>
@@ -940,15 +989,71 @@
     }
   });
 
+  // ---- Essentials checklist (ticks saved per device) ----
+  var ESSENTIALS = [
+    { text:'Clothes for 5 days (including jatti, baniyan, dhothi and shirt)' },
+    { text:'Rain coat' },
+    { text:'Jerkin' },
+    { text:'Medicines for kids, general medicines for adults' },
+    { text:'Shoe' },
+    { text:'Snacks, lemon, salt, sugar', who:'Ayya' },
+    { text:'Water can 20L', who:'Sankar' },
+    { text:'Soap, shampoo, brush, paste' },
+    { text:'Speaker, pulippu mittai, playing card, water dispenser', who:'Navin' }
+  ];
+  var ESS_KEY = 'vc-loop-essentials';
+  var essDone = {};
+  try { essDone = JSON.parse(localStorage.getItem(ESS_KEY) || '{}') || {}; } catch(e) { essDone = {}; }
+
+  var essListEl = document.getElementById('essList');
+  function updateEssProgress(){
+    var n = ESSENTIALS.filter(function(_, i){ return essDone['e' + i]; }).length;
+    document.getElementById('essCount').textContent = n + ' of ' + ESSENTIALS.length + ' packed';
+    document.getElementById('essBar').style.width = (n / ESSENTIALS.length * 100) + '%';
+  }
+  ESSENTIALS.forEach(function(item, i){
+    var li = document.createElement('li');
+    var label = document.createElement('label');
+    label.className = 'ess-item';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!essDone['e' + i];
+    cb.addEventListener('change', function(){
+      if (cb.checked) essDone['e' + i] = true; else delete essDone['e' + i];
+      try { localStorage.setItem(ESS_KEY, JSON.stringify(essDone)); } catch(e) {}
+      updateEssProgress();
+    });
+    var text = document.createElement('span');
+    text.className = 'ess-text';
+    text.textContent = item.text;
+    label.appendChild(cb);
+    label.appendChild(text);
+    if (item.who) {
+      var who = document.createElement('span');
+      who.className = 'ess-who';
+      who.textContent = item.who;
+      label.appendChild(who);
+    }
+    li.appendChild(label);
+    essListEl.appendChild(li);
+  });
+  updateEssProgress();
+
+  var DEPARTURE_MS = new Date('2026-10-16T05:00:00+05:30').getTime();
+  var TRIP_END_MS = new Date('2026-10-21T00:00:00+05:30').getTime();
+  function pad2(n){ return n < 10 ? '0' + n : '' + n; }
   function updateCountdown(){
-    var departure = new Date('2026-10-16T05:00:00+05:30');
-    var now = new Date();
-    var diff = departure.getTime() - now.getTime();
     var el = document.getElementById('countdown');
-    if (diff <= 0) { el.textContent = 'On the road'; return; }
-    var days_ = Math.ceil(diff / 86400000);
-    el.textContent = days_ + (days_ === 1 ? ' day to go' : ' days to go');
+    var now = Date.now();
+    var diff = DEPARTURE_MS - now;
+    if (diff <= 0) { el.textContent = now < TRIP_END_MS ? 'On the road' : 'Trip complete'; return; }
+    var s = Math.floor(diff / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60); s -= m * 60;
+    el.textContent = (d > 0 ? d + 'd ' : '') + pad2(h) + 'h ' + pad2(m) + 'm ' + pad2(s) + 's to go';
   }
   updateCountdown();
+  setInterval(updateCountdown, 1000);
 })();
 </script>
